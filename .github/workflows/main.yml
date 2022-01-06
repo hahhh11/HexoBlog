@@ -1,4 +1,4 @@
-on: [push] # push 代码时触发
+on: [push] # push 代码时触发  本地build完再提交
 jobs: 
     deploy: 
         runs-on: ubuntu-latest
