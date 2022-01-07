@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预览</title>
+    <style>
+        body{
+            overflow: hidden;
+            width: 100vw;
+            height:100vh;
+        }
+    </style>
+</head>
+<body>
+    <iframe id="preview" style="display:block;position:absolute;width:375px;height:812px" src="" frameborder="0"></iframe>
+    <script>
+        var root = "https://www.aichaos.cn/"
+        function getQueryVariable(variable){
+                var query = window.location.search.substring(1);
+                var vars = query.split("&");
+                for (var i=0;i<vars.length;i++) {
+                        var pair = vars[i].split("=");
+                        if(pair[0] == variable){return pair[1];}
+                }
+                return(false);
+            }
+
+        document.body.onresize = function(){
+            var iframe = document.getElementById("preview")
+            iframe.style.left = (document.body.clientWidth-375)/2+"px"
+            iframe.style.top = (document.body.clientHeight-812)/2+"px"
+        }
+        document.body.onresize()
+        function isMobile() {
+            var userAgentInfo = navigator.userAgent;
+            var mobileAgents = [ "Android", "iPhone", "SymbianOS", "Windows Phone", "iPad","iPod"];
+            var mobile_flag = false;
+            //根据userAgent判断是否是手机
+            for (var v = 0; v < mobileAgents.length; v++) {
+                if (userAgentInfo.indexOf(mobileAgents[v]) > 0) {
+                    mobile_flag = true;
+                    break;
+                }
+            }
+            var screen_width = window.screen.width;
+            var screen_height = window.screen.height;   
+            //根据屏幕分辨率判断是否是手机
+            if(screen_width < 500 && screen_height < 800){
+                mobile_flag = true;
+            }
+            return mobile_flag;
+        }
+        var purl = getQueryVariable("purl")
+        purl = purl.replace(/_/g, "/")
+        console.log(purl)
+        if(isMobile()){
+            window.location.replace(root+purl)
+        }else{
+            document.getElementById("preview").src = root + purl
+        }
+        
+        
+    </script>
+</body>
+
+</html>

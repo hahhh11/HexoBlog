@@ -1,6 +1,5 @@
 # 侧边栏菜单
 menu:
-
   案例: /temps
 
 # 站点次标题和打字动效
@@ -32,7 +31,7 @@ progressBar: true
 
 # 告示板模块
 broadcast:
-  enable: true # true开启，false关闭
+  enable: false # true开启，false关闭
   type: 2 # 1：自定义输入，2：一言api(https://hitokoto.cn/)
   text: 一个安静优雅的hexo主题，快速且响应式。 # type为1时有效
 
@@ -249,24 +248,3 @@ lock:
   password: 123456
 
 
-# Live2D
-## https://github.com/xiazeyu/live2d-widget.js
-## https://l2dwidget.js.org/docs/class/src/index.js~L2Dwidget.html#instance-method-init
-live2d:
-  model:
-    scale: 1
-    hHeadPos: 0.5
-    vHeadPos: 0.618
-  display:
-    superSample: 2
-    width: 150
-    height: 300
-    position: right
-    hOffset: 0
-    vOffset: -20
-  mobile:
-    show: true
-    scale: 0.5
-  react:
-    opacityDefault: 0.7
-    opacityOnHover: 0.2
