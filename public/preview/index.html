@@ -55,11 +55,11 @@
         var purl = getQueryVariable("purl")
         purl = purl.replace(/_/g, "/")
         console.log(purl)
-        if(isMobile()){
-            window.location.replace(root+purl)
-        }else{
+        // if(isMobile()){
+        //     window.location.replace(root+purl)
+        // }else{
             document.getElementById("preview").src = root + purl
-        }
+        // }
         
         
     </script>
