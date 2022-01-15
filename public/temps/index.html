@@ -75,15 +75,27 @@
        
     <div class="article-entry" itemprop="articleBody">
        
-   <iframe   
+   <iframe  
+ id="lists" 
  width=100%
- height = 1000
  src="lists.html"  
  frameborder=0  
  >
  </iframe>
 
- 
+<script>
+    var ifr = document.querySelector('iframe');
+    ifr.onload = function () {
+      fixIframeHeight()
+    }
+    function fixIframeHeight(){
+      var oHeight = Math.max(ifr.contentWindow.document.documentElement.offsetHeight, ifr.contentWindow.document.body.offsetHeight);
+      var cHeight = Math.max(ifr.contentWindow.document.documentElement.clientHeight, ifr.contentWindow.document.body.clientHeight);
+      var height = Math.max(oHeight, cHeight);
+      ifr.style.height = height + 'px'
+    }
+    window.onresize = fixIframeHeight
+</script> 
       <!-- reward -->
       
     </div>
@@ -530,6 +542,6 @@
     
 
   </div>
-<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</body>
 
 </html>
