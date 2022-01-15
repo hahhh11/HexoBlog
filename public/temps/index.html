@@ -79,66 +79,48 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 
 <div class="container" >
-    <h3 id="98"><a href="#98" class="headerlink" title="98%"></a>98%</h3>
-    <div class="row row-sm-3">
-        <div class="col">
-            <iframe  
-            height=301.5 
-            width=187.5
-            src="https://www.aichaos.cn/98Percent/FlappyBird/released"  
-            frameborder=0  
-            >
-            </iframe>
-            <p><a href="https://www.aichaos.cn/preview/?purl=98Percent_FlappyBird_released">FlappyBird</a></p>
-        </div>
+    <h3><a href="#98" class="headerlink" title="98%"></a>98%</h3>
+    <div id="98%" class="row row-sm-3">
     </div>
-    <div class="row row-sm-3">
-        <h3 id="Mr-Kwon"><a href="#Mr-Kwon" class="headerlink" title="Mr.Kwon"></a>Mr.Kwon</h3><div style="display: flex;"></div>
-        <div class="col">
-            <iframe  
-            height=301.5 
-            width=187.5
-            src="https://www.aichaos.cn/MrKwon/released?game=2048"  
-            frameborder=0  
-            >
-            </iframe>
-            <a href="https://www.aichaos.cn/MrKwon/released?game=2048">2048 合成</a>
-        </div>
-        <div class="col">
-            <iframe  
-            height=301.5 
-            width=187.5
-            src="https://www.aichaos.cn/MrKwon/released?game=hextris"  
-            frameborder=0  
-            >
-            </iframe>
-            <a href="https://www.aichaos.cn/MrKwon/released?game=hextris">六边形消除</a>
-        </div>
-        <div class="col">
-            <iframe  
-            height=301.5 
-            width=187.5
-            src="https://www.aichaos.cn/MrKwon/released?game=gobang"  
-            frameborder=0  
-            >
-            </iframe>
-            <a href="https://www.aichaos.cn/MrKwon/released?game=gobang">五子棋</a>
-        </div>
+    <h3><a href="#Mr-Kwon" class="headerlink" title="Mr.Kwon"></a>Mr.Kwon</h3><div style="display: flex;"></div>
+    <div id="MrKwon" class="row row-sm-3">
     </div>
 </div>
 
 <script>
-    // var ifr = document.querySelector('iframe');
-    // ifr.onload = function () {
-    //   fixIframeHeight()
-    // }
-    // function fixIframeHeight(){
-    //   var oHeight = Math.max(ifr.contentWindow.document.documentElement.offsetHeight, ifr.contentWindow.document.body.offsetHeight);
-    //   var cHeight = Math.max(ifr.contentWindow.document.documentElement.clientHeight, ifr.contentWindow.document.body.clientHeight);
-    //   var height = Math.max(oHeight, cHeight);
-    //   ifr.style.height = height + 'px'
-    // }
-    // window.onresize = fixIframeHeight
+    var config = {
+        "98%":[{"name":"FlappyBird",link:"https://www.aichaos.cn/98Percent/FlappyBird/released"}],
+        "MrKwon":[
+            {"name":"2048 合成",link:"https://www.aichaos.cn/MrKwon/released?game=2048"},
+            {"name":"六边形消除",link:"https://www.aichaos.cn/MrKwon/released?game=hextris"},
+            {"name":"五子棋",link:"https://www.aichaos.cn/MrKwon/released?game=gobang"}
+        ]
+    }
+
+    var keys = Object.keys(config)
+    keys.forEach(key=>{
+        if(config[key] && config[key].length>0){
+            var child = ""
+            config[key].forEach(item=>{
+                var temp = `
+                    <div class="col">
+                        <iframe  
+                        height=301.5 
+                        width=187.5
+                        src="${item.link}"  
+                        frameborder=0  
+                        >
+                        </iframe>
+                        <a href="https://www.aichaos.cn/preview/?purl=${encodeURIComponent(item.link)}">${item.name}</a>
+                    </div>
+                `
+                child+=temp
+            })
+            console.log(child)
+            document.getElementById(key).innerHTML = child
+        }
+        
+    })
 </script> 
       <!-- reward -->
       

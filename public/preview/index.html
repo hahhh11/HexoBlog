@@ -53,12 +53,13 @@
             return mobile_flag;
         }
         var purl = getQueryVariable("purl")
-        purl = purl.replace(/_/g, "/")
+        // purl = purl.replace(/_/g, "/")
+        purl = decodeURIComponent(purl)
         console.log(purl)
         if(isMobile()){
-            window.location.replace(root+purl)
+            window.location.replace(purl)
         }else{
-            document.getElementById("preview").src = root + purl
+            document.getElementById("preview").src =  purl
         }
         
         
