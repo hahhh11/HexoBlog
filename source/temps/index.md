@@ -97,7 +97,7 @@ date: 2022-01-06 21:52:55
             {"name":"2048 合成",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=2048"},
             {"name":"六边形消除",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=hextris"},
             {"name":"五子棋",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=gobang"},
-            {"name":"五子棋",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=oneStroke"},
+            {"name":"一笔画",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=oneStroke"},
             {"name":"消消乐",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=xiaoxiaole"},
         ]
     }
