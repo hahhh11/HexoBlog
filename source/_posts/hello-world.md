@@ -4,9 +4,10 @@ title: tauri的使用探索
 
 
 ## 什么是[tauri](https://tauri.studio/)
-
+Tauri 是一个跨语言的通用系统，具有很高的组合性，允许工程师开发各种各样的应用。她使用 Rust 工具和在 Webview 中渲染HTML 相结合构建桌面应用。Tauri构建的应用可以用任意数量的 JS API / Rust API 组合，使 Webview 可以通过消息控制整个系统。
+任何可以在网站上显示东西，都可以在 Tuari 中显示！
 ### 为什么使用tauri
-
+够小
 
 ### 如何上手
 #### mac环境配置
