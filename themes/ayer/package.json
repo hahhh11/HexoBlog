@@ -1,6 +1,6 @@
 {
-  "name": "hexo-theme-ayer",
-  "version": "1.9.5",
+  "name": "hexoBlog",
+  "version": "0.0.1",
   "description": "a clean and elegant theme for hexo.",
   "scripts": {
     "dev": "rollup -c -w",
