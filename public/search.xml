@@ -35,11 +35,14 @@
 <h4 id="它是如何运作的："><a href="#它是如何运作的：" class="headerlink" title="它是如何运作的："></a>它是如何运作的：</h4><p>以前的检测系统会重新调整分类器或定位器的用途以执行检测。他们将模型应用于多个位置和比例的图像。图像的高评分区域被视为检测到的目标区域。</p>
 <p>YOLO使用完全不同的方法。它将单个神经网络应用于完整图像。该网络将图像划分为多个区域，并预测每个区域的边界框和概率。这些边界框按预测概率加权。</p>
 ]]></content>
+      <tags>
+        <tag>深度学习</tag>
+      </tags>
   </entry>
   <entry>
     <title>什么是向量（Vector）</title>
-    <url>/2022/02/16/WhatIsVector/</url>
-    <content><![CDATA[<h3 id="什么是向量"><a href="#什么是向量" class="headerlink" title="什么是向量"></a>什么是向量</h3><p>在讲什么是矩阵之前，我们需要来了解什么是向量：<br>向量是从研究一个数（例如：666） 拓展到研究一组数（例如：（6，66，666））的表示方法</p>
+    <url>/2021/07/20/WhatIsVector/</url>
+    <content><![CDATA[<p>在讲什么是矩阵之前，我们需要来了解什么是向量：<br>向量是从研究一个数（例如：666） 拓展到研究一组数（例如：（6，66，666））的表示方法</p>
 <h4 id="向量有什么用？——有两个视角来看待"><a href="#向量有什么用？——有两个视角来看待" class="headerlink" title="向量有什么用？——有两个视角来看待"></a>向量有什么用？——有两个视角来看待</h4><h6 id="最基础的使用用来表示方向"><a href="#最基础的使用用来表示方向" class="headerlink" title="最基础的使用用来表示方向:"></a>最基础的使用用来表示方向:</h6><img src="/images/whatisvector/img1.png" />
 
 <h6 id="更抽象的n维向量："><a href="#更抽象的n维向量：" class="headerlink" title="更抽象的n维向量："></a>更抽象的n维向量：</h6><img src="/images/whatisvector/img2.png" />
@@ -138,6 +141,69 @@
 ]]></content>
       <tags>
         <tag>Canvas</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>什么是矩阵（Matrix）</title>
+    <url>/2021/07/21/WhatIsMatrix/</url>
+    <content><![CDATA[<p>什么是矩阵？我们说向量是对一个数的拓展，代表一组数，那么矩阵就是对向量的拓展，它代表一组向量。<br>看待矩阵有两种视角——行向量和列向量<br>例如下图就是一个4*4的矩阵它有4行4列，当行数和列数相同时我们叫它——方阵</p>
+<img src="/images/whatismatrix/img1.png" />
+
+<p>计算机世界中我们通常使用一个二维数组来表示一个矩阵</p>
+<h3 id="矩阵的基本运算："><a href="#矩阵的基本运算：" class="headerlink" title="矩阵的基本运算："></a>矩阵的基本运算：</h3><h5 id="1、矩阵的加法"><a href="#1、矩阵的加法" class="headerlink" title="1、矩阵的加法"></a>1、矩阵的加法</h5><p>和向量加法一样，矩阵的加法的结果就是矩阵中的每一项相加组成的一个新矩阵</p>
+<img src="/images/whatismatrix/img2.png" />
+
+<p>举个例子：</p>
+<img src="/images/whatismatrix/img3.png" />
+
+<p>当我们想知道所有学生上下学期每门科目的成绩总和时就只需要A+B就能得出我们想要的结果</p>
+<h5 id="2、矩阵的数量乘法"><a href="#2、矩阵的数量乘法" class="headerlink" title="2、矩阵的数量乘法"></a>2、矩阵的数量乘法</h5><p>和向量数量乘法一样，矩阵的数量乘法的结果就是用标量k去乘以向量中的每一个元素而组成的新矩阵</p>
+<img src="/images/whatismatrix/img4.png" />
+
+<p>使用之前的例子，如果我们希望知道所有学生上下学期每一门课程的平均分就只需要1/2*(A+B)就能得出我们想要的结果<br>使用另一个视角再举个例子：</p>
+<img src="/images/whatismatrix/img5.png" />
+
+<p>矩阵P是一个3*2的矩阵 其中第一个列向量里表示x轴的坐标，第二个列向量里表示y轴坐标，那么矩阵P这时候就表示一个三角形，对这个P做数量乘法就是对P里的每一个元素做数量乘法，相当于将这个三角行缩放了两倍。</p>
+<h3 id="矩阵遵循的基本性质："><a href="#矩阵遵循的基本性质：" class="headerlink" title="矩阵遵循的基本性质："></a>矩阵遵循的基本性质：</h3><img src="/images/whatismatrix/img6.png" />
+
+<h3 id="矩阵和向量相乘："><a href="#矩阵和向量相乘：" class="headerlink" title="矩阵和向量相乘："></a>矩阵和向量相乘：</h3><img src="/images/whatismatrix/img7.png" />
+
+<img src="/images/whatismatrix/img8.png" />
+
+<p>如上图，这是一个线性方程组，我们可以把它写成矩阵的形式，这是一个矩阵乘以一个向量等于一个向量的形式。</p>
+<img src="/images/whatismatrix/img9.png" />
+
+<p>我们可以得出矩阵和向量相乘，等于矩阵的每一行的每一个元素分别乘以这个向量的每个元素再相加</p>
+<img src="/images/whatismatrix/img10.png" />
+
+<p>我们可以把矩阵看作是向量的函数（很多小伙伴会说函数？这个我熟！）——f(向量a)=向量b，矩阵就是那个f()</p>
+<h3 id="矩阵和矩阵相乘："><a href="#矩阵和矩阵相乘：" class="headerlink" title="矩阵和矩阵相乘："></a>矩阵和矩阵相乘：</h3><img src="/images/whatismatrix/img11.png" />
+
+<p>由矩阵和向量的乘法我们可以推出和矩阵的乘法其实就是把后面的矩阵看作是好多个向量，矩阵和矩阵的乘法其实就是前一个矩阵和后一个矩阵的每一列进行矩阵和向量的乘法计算，最后组成的新矩阵就是两个矩阵相乘的结果。</p>
+<img src="/images/whatismatrix/img12.png" />
+
+<p>我们有矩阵P代表红色的三角形，我们希望它的x轴方向扩大1.5倍，y轴方向扩大2倍，就可以使用矩阵的乘法得出一个新的矩阵，它代表的就是图中蓝色的三角形。</p>
+<img src="/images/whatismatrix/img13.png" />
+
+<p>矩阵和矩阵相乘时必须保证前一个矩阵的行数和后一个矩阵的列数相同，否则无法进行计算。<br>即Aab<em>Bbc=Cac（下标表示几行几列）<br>另外A</em>B不一定等于B*A，有的甚至交换位置不能相乘。</p>
+<h3 id="矩阵的转置："><a href="#矩阵的转置：" class="headerlink" title="矩阵的转置："></a>矩阵的转置：</h3><p>更多时候我们更愿意把矩阵写成这样：</p>
+<img src="/images/whatismatrix/img14.png" />
+
+<p>但是这个矩阵是无法和</p>
+<img src="/images/whatismatrix/img15.png" />
+
+<p>相乘，这时候我们就需要使用矩阵的转置。</p>
+<p>我们把这个P矩阵推倒</p>
+<img src="/images/whatismatrix/img16.png" />
+
+<p>把原矩阵的列变行，行变列，即</p>
+<img src="/images/whatismatrix/img17.png" />
+
+<p>这个时候就能进行矩阵的乘法了</p>
+<h3 id="矩阵转置的性质："><a href="#矩阵转置的性质：" class="headerlink" title="矩阵转置的性质："></a>矩阵转置的性质：</h3><img src="/images/whatismatrix/img18.png" />
+]]></content>
+      <tags>
+        <tag>深度学习</tag>
       </tags>
   </entry>
 </search>

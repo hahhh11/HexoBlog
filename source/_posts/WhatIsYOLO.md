@@ -1,7 +1,7 @@
 ---
 title: 什么是YOLO
 date: 2022-02-15 17:49:07
-tags:
+tags: 深度学习
 ---
 
 YOLO是You only look once的缩写，是目前最先进的实时物体检测算法之一，目前已经升级到了V5版本。
