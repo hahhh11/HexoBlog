@@ -6,7 +6,7 @@
   <link href="https://www.aichaos.cn/atom.xml" rel="self"/>
   
   <link href="https://www.aichaos.cn/"/>
-  <updated>2022-02-06T06:26:55.233Z</updated>
+  <updated>2022-02-16T05:02:08.982Z</updated>
   <id>https://www.aichaos.cn/</id>
   
   <author>
@@ -17,11 +17,70 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>性能优化</title>
+    <link href="https://www.aichaos.cn/2022/02/16/PerformanceOptimization/"/>
+    <id>https://www.aichaos.cn/2022/02/16/PerformanceOptimization/</id>
+    <published>2022-02-16T03:57:39.000Z</published>
+    <updated>2022-02-16T05:02:08.982Z</updated>
+    
+    <content type="html"><![CDATA[<p><a href="https://g-next.antv.vision/zh/docs/guide/advanced-topics/performance-optimization">引用地址</a></p><h3 id="方法一：减少-Draw-Call"><a href="#方法一：减少-Draw-Call" class="headerlink" title="方法一：减少 Draw Call"></a>方法一：减少 Draw Call</h3><p>首先我们需要引入一个核心概念 Draw Call，以下介绍的优化方法大多围绕它展开。</p><h4 id="什么是-Draw-Call"><a href="#什么是-Draw-Call" class="headerlink" title="什么是 Draw Call"></a>什么是 Draw Call</h4><p>Draw Call就是CPU调用图形编程接口,比如DirectX或OpenGL,来命令GPU进行渲染的操作。<br>为啥 draw call 多了就会影响性能呢？因为在 CPU 和 GPU 进行异步协作的过程中，会向 command buffer 中提交需要 GPU 执行的命令，例如设置状态、绘制或者拷贝资源。CPU 准备这些命令的速度与 GPU 执行的速度存在不小差异，这就造成了性能瓶颈。</p><p>下图分别展示了每一帧中 CPU 和 GPU 的时间线，可以看出 GPU 总是在执行上一帧 CPU 提交的命令，与此同时 CPU 在准备下一帧的命令。当这些绘制命令数量不多时，两者协作没问题，但如果数量很多，GPU 在做完这一帧的渲染任务后就不得不等待，也就无法在 16ms 内完成了，这造成了卡顿的体感。<br><img src="/images/drawcallprocess.png" /></p><h4 id="如何减少-Draw-Call"><a href="#如何减少-Draw-Call" class="headerlink" title="如何减少 Draw Call"></a>如何减少 Draw Call</h4><p>因为以上原因，我们需要减少 Draw Call 的次数，能少画就少画，能不画就不画。</p><p>我们通常使用以下方法进行Draw Call的优化：</p><h5 id="剔除"><a href="#剔除" class="headerlink" title="剔除"></a>剔除</h5><p>在场景中的仅有一部分可见的情况下，我们通过剔除暂时不可见的元素，就能减少绘制命令的数量。<br><img src="/images/drawcallmethod_img1.png" /></p><p>在判断一个图形是否在视口内时，我们通常会使用一种称作“包围盒”的结构。图形可以千变万化，但总可以找到一个包裹住它的最小基础几何结构，这个结构可以是“包围盒”，也可以是“包围球”，总之是为了后续计算元素与视口求交时方便。我们选择轴对齐包围盒。推广到 3D 场景中，视口也变成了视锥。<br><img src="/images/drawcallmethod_img2.png" /></p><p>在每一帧都在 CPU 端进行这样的求交运算开销不小，特别当场景中图形数量较多时。另外在 3D 场景中视锥与包围盒（立方体）各个面的求交开销更大，因此我们也采用了一系列优化方法：</p><p>在 3D 场景进行视锥剔除时，我们尽量使用了如下<a href="https://github.com/antvis/GWebGPUEngine/issues/3">加速检测方法</a>：</p><ol><li>基础相交测试 the basic intersection test</li><li>平面一致性测试 the plane-coherency test</li><li>八分测试 the octant test</li><li>标记 masking</li><li>平移旋转一致性测试 TR coherency test<br>更多可以参考：</li></ol><ul><li><a href="http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/pubs/vfcullbox.pdf.gz">Optimized View Frustum Culling Algorithms for Bounding Boxes</a></li><li><a href="http://old.cescg.org/CESCG-2002/DSykoraJJelinek/">Efficient View Frustum Culling</a></li><li><a href="https://zhuanlan.zhihu.com/p/55915345">视锥体剔除 AABB 和 OBB 包围盒的优化方法</a></li></ul><h5 id="其他剔除手段："><a href="#其他剔除手段：" class="headerlink" title="其他剔除手段："></a>其他剔除手段：</h5><p>在 WebGL / WebGPU 这样的渲染 API 中，还提供了其他剔除手段：</p><p>背面剔除，<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/cullFace">gl.cullFace</a><br>遮挡剔除，<a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/createQuery">gl.createQuery</a>。至少需要 WebGL2</p><h3 id="方法二：“脏矩形”渲染"><a href="#方法二：“脏矩形”渲染" class="headerlink" title="方法二：“脏矩形”渲染"></a>方法二：“脏矩形”渲染</h3><p>有一种常见的交互是通过鼠标高亮某个图形。此时场景中仅有一小部分发生了改变，擦除画布中的全部图形再重绘就显得没有必要了。类比 React diff 算法能够找出真正变化的最小部分，“脏矩形”渲染能尽可能复用上一帧的渲染结果，仅绘制变更部分，特别适合 Canvas2D API。</p><h4 id="什么是“脏矩形”"><a href="#什么是“脏矩形”" class="headerlink" title="什么是“脏矩形”"></a>什么是“脏矩形”</h4><p>脏矩形是2D图形性能优化一个重要的概念。</p><p>简单说脏矩形，就是画面刷新时，产生变化而需要重绘的舞台局部区域。</p><p>   什么叫脏，即什么情况下会弄脏？</p><p>   当我们的游戏中的元素 发生位置，大小，方向，动画，添加，删除等操作时，那么该元素原来对应的区域会弄脏，同时，新对应的区域也同样被弄脏。</p><p>使用脏矩形将大大减少无用的渲染工作量，降低额外性能消耗。</p><h4 id="实现“脏矩形”的思路"><a href="#实现“脏矩形”的思路" class="headerlink" title="实现“脏矩形”的思路"></a>实现“脏矩形”的思路</h4><ul><li>当鼠标悬停在圆上时，我们知道了对应的“脏矩形”，也就是这个圆的包围盒</li><li>找到场景中与这个包围盒区域相交的其他图形，这里找到了另一个矩形</li><li>使用 clearRect 清除这个“脏矩形”，代替清空整个画布</li><li>按照 z-index 依次绘制一个矩形和圆形</li><li><img src="/images/dirtyRect.png" /></li></ul><p>在以上求交与区域查询的过程中，我们可以复用剔除方案中的优化手段，例如加速结构。</p><p>显然当动态变化的对象数目太多时，该优化手段就失去了意义，试想经过一番计算合并后的“脏矩形”几乎等于整个画布，那还不如直接清空重绘所有对象。因此例如 Pixi.js 这样的 2D 游戏渲染引擎就不考虑内置。</p><p>但在可视化这类相对静态的场景下就显得有意义了，例如在触发拾取后只更新图表的局部，其余部分保持不变。</p><h3 id="方法三：批处理（batching）"><a href="#方法三：批处理（batching）" class="headerlink" title="方法三：批处理（batching）"></a>方法三：批处理（batching）</h3><p>以上两种方法当然有不适合的场景，例如希望总览一个大规模图场景的全貌时，无法应用剔除（所有节点/边都在视口内）。拖拽移动整个场景时，“脏矩阵”渲染效果也不佳（整个场景都变“脏”了）。</p><p>除了使用一些上层的 LOD 手段，例如缩放等级较高时，隐藏掉边和文本（因为也看不清），以此减少绘制命令数量之外，draw call batching 是非常合适的。</p><p>不同于 Canvas2D / Skia 提供的抽象层次较高的绘制 API，WebGL / WebGPU 提供了更低层次的 API，可以让我们将一批“同类”图形合并成一次绘制命令。在渲染引擎中，常用于渲染类似森林中大量树木这种场景。图场景同样十分契合，场景中包含大量同类但简单的图形（节点、边）。</p><h3 id="离屏Canvas（Offscreen-Canvas）"><a href="#离屏Canvas（Offscreen-Canvas）" class="headerlink" title="离屏Canvas（Offscreen Canvas）"></a>离屏Canvas（Offscreen Canvas）</h3><p>仅 g-webgl 下生效。</p><p>当主线程需要处理较重的交互时，我们可以将 Canvas 的渲染工作交给 Worker 完成，主线程仅负责同步结果。目前很多渲染引擎已经支持，例如 Babylon.js。</p><p>为了支持该特性，引擎本身并不需要做很多改造，只要能够保证 g-webgl 能在 Worker 中运行即可。</p><h5 id="局限性"><a href="#局限性" class="headerlink" title="局限性"></a>局限性</h5><p>由于运行在 Worker 环境，用户需要手动处理一些 DOM 相关的事件。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;a href=&quot;https://g-next.antv.vision/zh/docs/guide/advanced-topics/performance-optimization&quot;&gt;引用地址&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&quot;方法一：减少-Draw-Call&quot;&gt;&lt;a hre</summary>
+      
+    
+    
+    
+    
+    <category term="Canvas" scheme="https://www.aichaos.cn/tags/Canvas/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>什么是向量（Vector）</title>
+    <link href="https://www.aichaos.cn/2022/02/16/WhatIsVector/"/>
+    <id>https://www.aichaos.cn/2022/02/16/WhatIsVector/</id>
+    <published>2022-02-16T03:00:23.000Z</published>
+    <updated>2022-02-16T04:05:15.255Z</updated>
+    
+    
+    
+    
+    
+    <category term="深度学习" scheme="https://www.aichaos.cn/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>什么是YOLO</title>
+    <link href="https://www.aichaos.cn/2022/02/15/WhatIsYOLO/"/>
+    <id>https://www.aichaos.cn/2022/02/15/WhatIsYOLO/</id>
+    <published>2022-02-15T09:49:07.000Z</published>
+    <updated>2022-02-16T02:59:14.947Z</updated>
+    
+    <content type="html"><![CDATA[<p>YOLO是You only look once的缩写，是目前最先进的实时物体检测算法之一，目前已经升级到了V5版本。</p><h4 id="优势："><a href="#优势：" class="headerlink" title="优势："></a>优势：</h4><p>YOLO非常的快速和准确，只需更改模型的大小即可在速度和精度之间轻松权衡，无需重新训练！<br>与基于分类器的系统相比，YOLO具有几个优点。它在测试时查看整个图像，以便其预测由图像中的全局上下文提供信息。它还通过单个网络评估进行预测，这与R-CNN等系统不同，R-CNN需要数千个图像才能完成。这使得它非常快，比R-CNN快1000倍以上，比Fast R-CNN快100倍。YOLO模型以每秒45帧的速度实时处理图像。该网络的较小版本Fast YOLO每秒处理惊人的155帧，同时仍能实现其他实时探测器的两倍mAP</p><h4 id="它是如何运作的："><a href="#它是如何运作的：" class="headerlink" title="它是如何运作的："></a>它是如何运作的：</h4><p>以前的检测系统会重新调整分类器或定位器的用途以执行检测。他们将模型应用于多个位置和比例的图像。图像的高评分区域被视为检测到的目标区域。</p><p>YOLO使用完全不同的方法。它将单个神经网络应用于完整图像。该网络将图像划分为多个区域，并预测每个区域的边界框和概率。这些边界框按预测概率加权。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;YOLO是You only look once的缩写，是目前最先进的实时物体检测算法之一，目前已经升级到了V5版本。&lt;/p&gt;
+&lt;h4 id=&quot;优势：&quot;&gt;&lt;a href=&quot;#优势：&quot; class=&quot;headerlink&quot; title=&quot;优势：&quot;&gt;&lt;/a&gt;优势：&lt;/h4&gt;&lt;p&gt;</summary>
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
     <title>tauri的使用探索</title>
-    <link href="https://www.aichaos.cn/2022/01/07/hello-world/"/>
-    <id>https://www.aichaos.cn/2022/01/07/hello-world/</id>
-    <published>2022-01-07T13:54:59.127Z</published>
-    <updated>2022-02-06T06:26:55.233Z</updated>
+    <link href="https://www.aichaos.cn/2022/02/09/hello-world/"/>
+    <id>https://www.aichaos.cn/2022/02/09/hello-world/</id>
+    <published>2022-02-09T05:53:41.894Z</published>
+    <updated>2022-02-09T05:53:41.894Z</updated>
     
     <content type="html"><![CDATA[<h2 id="什么是tauri"><a href="#什么是tauri" class="headerlink" title="什么是tauri"></a>什么是<a href="https://tauri.studio/">tauri</a></h2><p>Tauri 是一个跨语言的通用系统，具有很高的组合性，允许工程师开发各种各样的应用。她使用 Rust 工具和在 Webview 中渲染HTML 相结合构建桌面应用。Tauri构建的应用可以用任意数量的 JS API / Rust API 组合，使 Webview 可以通过消息控制整个系统。<br>任何可以在网站上显示东西，都可以在 Tuari 中显示！</p><h3 id="为什么使用tauri"><a href="#为什么使用tauri" class="headerlink" title="为什么使用tauri"></a>为什么使用tauri</h3><p>够小</p><h3 id="如何上手"><a href="#如何上手" class="headerlink" title="如何上手"></a>如何上手</h3><h4 id="mac环境配置"><a href="#mac环境配置" class="headerlink" title="mac环境配置"></a>mac环境配置</h4><p>需要安装 gcc 和 xcode-selec和Rustc依次执行</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">brew install gcc</span><br><span class="line">xcode-select --install</span><br><span class="line">curl --proto <span class="string">&#x27;=https&#x27;</span> --tlsv1.2 -sSf https://sh.rustup.rs | sh</span><br></pre></td></tr></table></figure><h4 id="Windows环境配置"><a href="#Windows环境配置" class="headerlink" title="Windows环境配置"></a>Windows环境配置</h4><p>点击跳转下载安装 <a href="https://visualstudio.microsoft.com/visual-cpp-build-tools/">Visual Studio C++</a> 、 <a href="https://developer.microsoft.com/en-us/microsoft-edge/webview2/#download-section">WebView2</a> 、Rustc（<a href="https://win.rustup.rs/x86_64">64位下载</a>｜<a href="https://win.rustup.rs/i686">32位下载</a>）</p><h4 id="公用环境配置（mac、Windows）"><a href="#公用环境配置（mac、Windows）" class="headerlink" title="公用环境配置（mac、Windows）"></a>公用环境配置（mac、Windows）</h4><h5 id="1-修改host文件加速-github"><a href="#1-修改host文件加速-github" class="headerlink" title="1.修改host文件加速 github"></a>1.修改host文件加速 github</h5><p>#mac 打开访达，commnd+shift+g，输入/etc/hosts<br>#windows  打开文件夹访问 C:\Windows\System32\drivers\etc</p><p>在hosts的最后加上<br>140.82.112.3 github.com<br>199.232.69.194 github.global.ssl.fastly.net</p><h5 id="2-node环境（node-12以上）建议替换npm或者yarn的源（建议使用nrm、yrm-如下"><a href="#2-node环境（node-12以上）建议替换npm或者yarn的源（建议使用nrm、yrm-如下" class="headerlink" title="2.node环境（node 12以上）建议替换npm或者yarn的源（建议使用nrm、yrm 如下);"></a>2.node环境（node 12以上）建议替换npm或者yarn的源（建议使用nrm、yrm 如下);</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">npm install -g nrm </span><br><span class="line">nrm <span class="built_in">test</span> </span><br><span class="line">nrm use taobao</span><br><span class="line"></span><br><span class="line">npm install -g yarn </span><br><span class="line">npm install -g yrm </span><br><span class="line">yrm <span class="built_in">test</span> </span><br><span class="line">yrm use tabao</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">rustc --version //检查rust版本</span><br><span class="line">cargo --version //检查cargo版本</span><br></pre></td></tr></table></figure><p>修改cargo源<br>mac版本 </p><h5 id="3-修改rust的Cargo源"><a href="#3-修改rust的Cargo源" class="headerlink" title="3.修改rust的Cargo源"></a>3.修改rust的Cargo源</h5><p>先检查rust是否安装成功</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rustc --version //检查rust版本</span><br><span class="line">cargo --version //检查cargo版本</span><br></pre></td></tr></table></figure><p>再打开.cargo文件夹下面的config文件,mac通过 vim $HOME/.cargo/config 进入</p><p>window通过安装的时候选择的目录可以进入直接编辑就可以了</p><p>全改成下面的字段如果没用这个文件直接创建就可以了。</p><p>[source.crates-io]<br>registry = “<a href="https://github.com/rust-lang/crates.io-index&quot;">https://github.com/rust-lang/crates.io-index&quot;</a></p><p>#替换成你偏好的镜像源<br>replace-with = ‘sjtu’</p><p>#清华大学<br>#[source.tuna]<br>#registry = “<a href="https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git&quot;">https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git&quot;</a></p><p>#中国科学技术大学<br>#[source.ustc]<br>#registry = “git://mirrors.ustc.edu.cn/crates.io-index”</p><p>#上海交通大学<br>[source.sjtu]<br>registry = “<a href="https://mirrors.sjtug.sjtu.edu.cn/git/crates.io-index&quot;">https://mirrors.sjtug.sjtu.edu.cn/git/crates.io-index&quot;</a></p><p>#rustcc社区<br>#[source.rustcc]<br>#registry = “git://crates.rustcc.cn/crates.io-index”</p><h5 id="4-修改完毕安装tauri-bundler"><a href="#4-修改完毕安装tauri-bundler" class="headerlink" title="4.修改完毕安装tauri-bundler"></a>4.修改完毕安装tauri-bundler</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cargo install tauri-bundler --force</span><br></pre></td></tr></table></figure><p>#可能需要很长时间不要着急<br>#安装完毕过后执行<br>mac:source $HOME/.cargo/env或者重启命令行<br>windows:重启命令行</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//结束后全局安装下</span><br><span class="line">cargo install tauri-cli --version ^1.0.0-beta</span><br></pre></td></tr></table></figure>]]></content>
     
