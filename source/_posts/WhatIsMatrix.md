@@ -2,6 +2,7 @@
 title: 什么是矩阵（Matrix）
 author: 98Percent
 date: 2021-07-21 13:47:06
+categories: 深度学习
 tags: 深度学习
 ---
 

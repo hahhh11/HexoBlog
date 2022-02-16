@@ -2,6 +2,7 @@
 title: 什么是向量（Vector）
 author: 98Percent
 date: 2021-07-20 11:00:23
+categories: 深度学习
 tags: 深度学习
 ---
 

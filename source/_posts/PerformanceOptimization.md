@@ -1,6 +1,7 @@
 ---
 title: 性能优化
 date: 2022-02-16 11:57:39
+categories: Canvas相关
 tags: Canvas
 ---
 

@@ -11,7 +11,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>什么是矩阵（Matrix） |  </title>
+      <title>Canvas相关 |  </title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -54,251 +54,58 @@
       
     <main class="content on">
       <section class="outer">
-  <article
-  id="post-WhatIsMatrix"
-  class="article article-type-post"
-  itemscope
-  itemprop="blogPost"
-  data-scroll-reveal
->
-  <div class="article-inner">
+  
+  
+  <article class="articles">
     
-    <header class="article-header">
-       
-<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  什么是矩阵（Matrix）
-</h1>
- 
-
-      
-
-    <div class="article-author"  style="text-align: center" >
-        作者：98Percent 
+    
+    <h1 class="page-type-title">Canvas相关</h1>
+    
+    
+  
+  
+  
+  
+  
+  
+  <div class="archives-wrap">
+    <div class="archive-year-wrap">
+      <a href="/archives/2022" class="archive-year">2022</a>
     </div>
-
+    <div class="archives">
+      
+      <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      <a href="/2022/02/16/PerformanceOptimization/" class="archive-article-date">
+  <time datetime="2022-02-16T03:57:39.000Z" itemprop="datePublished">02/16</time>
+</a>
+       
+<h2 itemprop="name">
+  <a class="archive-article-title" href="/2022/02/16/PerformanceOptimization/"
+    >性能优化</a> 
+</h2>
+ 
 
     </header>
-     
-    <div class="article-meta">
-      <a href="/2021/07/21/WhatIsMatrix/" class="article-date">
-  <time datetime="2021-07-21T05:47:06.000Z" itemprop="datePublished">2021-07-21</time>
-</a> 
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a>
-  </div>
- 
-    </div>
+    
       
-    <div class="tocbot"></div>
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Canvas%E7%9B%B8%E5%85%B3/">Canvas相关</a>
+  </div>
 
-
-
+    
+    
+  </div>
+</article>
+      
+      
+    </div>
+  </div>
+  
+  
 
   
-    <div class="article-entry" itemprop="articleBody">
-       
-  <p>什么是矩阵？我们说向量是对一个数的拓展，代表一组数，那么矩阵就是对向量的拓展，它代表一组向量。<br>看待矩阵有两种视角——行向量和列向量<br>例如下图就是一个4*4的矩阵它有4行4列，当行数和列数相同时我们叫它——方阵</p>
-<img src="/images/whatismatrix/img1.png" />
-
-<p>计算机世界中我们通常使用一个二维数组来表示一个矩阵</p>
-<h3 id="矩阵的基本运算："><a href="#矩阵的基本运算：" class="headerlink" title="矩阵的基本运算："></a>矩阵的基本运算：</h3><h5 id="1、矩阵的加法"><a href="#1、矩阵的加法" class="headerlink" title="1、矩阵的加法"></a>1、矩阵的加法</h5><p>和向量加法一样，矩阵的加法的结果就是矩阵中的每一项相加组成的一个新矩阵</p>
-<img src="/images/whatismatrix/img2.png" />
-
-<p>举个例子：</p>
-<img src="/images/whatismatrix/img3.png" />
-
-<p>当我们想知道所有学生上下学期每门科目的成绩总和时就只需要A+B就能得出我们想要的结果</p>
-<h5 id="2、矩阵的数量乘法"><a href="#2、矩阵的数量乘法" class="headerlink" title="2、矩阵的数量乘法"></a>2、矩阵的数量乘法</h5><p>和向量数量乘法一样，矩阵的数量乘法的结果就是用标量k去乘以向量中的每一个元素而组成的新矩阵</p>
-<img src="/images/whatismatrix/img4.png" />
-
-<p>使用之前的例子，如果我们希望知道所有学生上下学期每一门课程的平均分就只需要1/2*(A+B)就能得出我们想要的结果<br>使用另一个视角再举个例子：</p>
-<img src="/images/whatismatrix/img5.png" />
-
-<p>矩阵P是一个3*2的矩阵 其中第一个列向量里表示x轴的坐标，第二个列向量里表示y轴坐标，那么矩阵P这时候就表示一个三角形，对这个P做数量乘法就是对P里的每一个元素做数量乘法，相当于将这个三角行缩放了两倍。</p>
-<h3 id="矩阵遵循的基本性质："><a href="#矩阵遵循的基本性质：" class="headerlink" title="矩阵遵循的基本性质："></a>矩阵遵循的基本性质：</h3><img src="/images/whatismatrix/img6.png" />
-
-<h3 id="矩阵和向量相乘："><a href="#矩阵和向量相乘：" class="headerlink" title="矩阵和向量相乘："></a>矩阵和向量相乘：</h3><img src="/images/whatismatrix/img7.png" />
-
-<img src="/images/whatismatrix/img8.png" />
-
-<p>如上图，这是一个线性方程组，我们可以把它写成矩阵的形式，这是一个矩阵乘以一个向量等于一个向量的形式。</p>
-<img src="/images/whatismatrix/img9.png" />
-
-<p>我们可以得出矩阵和向量相乘，等于矩阵的每一行的每一个元素分别乘以这个向量的每个元素再相加</p>
-<img src="/images/whatismatrix/img10.png" />
-
-<p>我们可以把矩阵看作是向量的函数（很多小伙伴会说函数？这个我熟！）——f(向量a)=向量b，矩阵就是那个f()</p>
-<h3 id="矩阵和矩阵相乘："><a href="#矩阵和矩阵相乘：" class="headerlink" title="矩阵和矩阵相乘："></a>矩阵和矩阵相乘：</h3><img src="/images/whatismatrix/img11.png" />
-
-<p>由矩阵和向量的乘法我们可以推出和矩阵的乘法其实就是把后面的矩阵看作是好多个向量，矩阵和矩阵的乘法其实就是前一个矩阵和后一个矩阵的每一列进行矩阵和向量的乘法计算，最后组成的新矩阵就是两个矩阵相乘的结果。</p>
-<img src="/images/whatismatrix/img12.png" />
-
-<p>我们有矩阵P代表红色的三角形，我们希望它的x轴方向扩大1.5倍，y轴方向扩大2倍，就可以使用矩阵的乘法得出一个新的矩阵，它代表的就是图中蓝色的三角形。</p>
-<img src="/images/whatismatrix/img13.png" />
-
-<p>矩阵和矩阵相乘时必须保证前一个矩阵的行数和后一个矩阵的列数相同，否则无法进行计算。<br>即Aab<em>Bbc=Cac（下标表示几行几列）<br>另外A</em>B不一定等于B*A，有的甚至交换位置不能相乘。</p>
-<h3 id="矩阵的转置："><a href="#矩阵的转置：" class="headerlink" title="矩阵的转置："></a>矩阵的转置：</h3><p>更多时候我们更愿意把矩阵写成这样：</p>
-<img src="/images/whatismatrix/img14.png" />
-
-<p>但是这个矩阵是无法和</p>
-<img src="/images/whatismatrix/img15.png" />
-
-<p>相乘，这时候我们就需要使用矩阵的转置。</p>
-<p>我们把这个P矩阵推倒</p>
-<img src="/images/whatismatrix/img16.png" />
-
-<p>把原矩阵的列变行，行变列，即</p>
-<img src="/images/whatismatrix/img17.png" />
-
-<p>这个时候就能进行矩阵的乘法了</p>
-<h3 id="矩阵转置的性质："><a href="#矩阵转置的性质：" class="headerlink" title="矩阵转置的性质："></a>矩阵转置的性质：</h3><img src="/images/whatismatrix/img18.png" />
- 
-      <!-- reward -->
-      
-    </div>
-    
-
-    <!-- copyright -->
-    
-    <div class="declare">
-      <ul class="post-copyright">
-        <li>
-          <i class="ri-copyright-line"></i>
-          <strong>版权声明： </strong>
-          
-          本博客所有文章除特别声明外，著作权归作者所有。转载请注明出处！
-          
-        </li>
-      </ul>
-    </div>
-    
-    <footer class="article-footer">
-       
-<div class="share-btn">
-      <span class="share-sns share-outer">
-        <i class="ri-share-forward-line"></i>
-        分享
-      </span>
-      <div class="share-wrap">
-        <i class="arrow"></i>
-        <div class="share-icons">
-          
-          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
-            <i class="ri-weibo-fill"></i>
-          </a>
-          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
-            <i class="ri-wechat-fill"></i>
-          </a>
-          <a class="qq share-sns" href="javascript:;" data-type="qq">
-            <i class="ri-qq-fill"></i>
-          </a>
-          <a class="douban share-sns" href="javascript:;" data-type="douban">
-            <i class="ri-douban-line"></i>
-          </a>
-          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
-            <i class="icon icon-qzone"></i>
-          </a> -->
-          
-          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
-            <i class="ri-facebook-circle-fill"></i>
-          </a>
-          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
-            <i class="ri-twitter-fill"></i>
-          </a>
-          <a class="google share-sns" href="javascript:;" data-type="google">
-            <i class="ri-google-fill"></i>
-          </a>
-        </div>
-      </div>
-</div>
-
-<div class="wx-share-modal">
-    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.aichaos.cn/2021/07/21/WhatIsMatrix/" alt="微信分享二维码">
-    </div>
-</div>
-
-<div id="share-mask"></div>  
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag">深度学习</a></li></ul>
-
-    </footer>
-  </div>
-
-   
-  <nav class="article-nav">
-    
-      <a href="/2022/02/09/HowTouseTauri/" class="article-nav-link">
-        <strong class="article-nav-caption">上一篇</strong>
-        <div class="article-nav-title">
-          
-            tauri的使用探索
-          
-        </div>
-      </a>
-    
-    
-      <a href="/2021/07/20/WhatIsVector/" class="article-nav-link">
-        <strong class="article-nav-caption">下一篇</strong>
-        <div class="article-nav-title">什么是向量（Vector）</div>
-      </a>
-    
-  </nav>
-
-   
-<!-- valine评论 -->
-<div id="vcomments-box">
-  <div id="vcomments"></div>
-</div>
-<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script>
-<script>
-  new Valine({
-    el: "#vcomments",
-    app_id: "",
-    app_key: "",
-    path: window.location.pathname,
-    avatar: "monsterid",
-    placeholder: "给我的文章加点评论吧~",
-    recordIP: true,
-  });
-  const infoEle = document.querySelector("#vcomments .info");
-  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
-    infoEle.childNodes.forEach(function (item) {
-      item.parentNode.removeChild(item);
-    });
-  }
-</script>
-<style>
-  #vcomments-box {
-    padding: 5px 30px;
-  }
-
-  @media screen and (max-width: 800px) {
-    #vcomments-box {
-      padding: 5px 0px;
-    }
-  }
-
-  #vcomments-box #vcomments {
-    background-color: #fff;
-  }
-
-  .v .vlist .vcard .vh {
-    padding-right: 20px;
-  }
-
-  .v .vlist .vcard {
-    padding-left: 10px;
-  }
-</style>
-
- 
-   
-     
-</article>
-
 </section>
       <footer class="footer">
   <div class="outer">
@@ -419,22 +226,6 @@
 <script src="/js/lazyload.min.js"></script>
 
 <!-- Tocbot -->
- 
-<script src="/js/tocbot.min.js"></script>
-
-<script>
-  tocbot.init({
-    tocSelector: ".tocbot",
-    contentSelector: ".article-entry",
-    headingSelector: "h1, h2, h3, h4, h5, h6",
-    hasInnerContainers: true,
-    scrollSmooth: true,
-    scrollContainer: "main",
-    positionFixedSelector: ".tocbot",
-    positionFixedClass: "is-position-fixed",
-    fixedSidebarOffset: "auto",
-  });
-</script>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
 <link

@@ -1,6 +1,7 @@
 ---
 title: 什么是YOLO
 date: 2022-02-15 17:49:07
+categories: 深度学习
 tags: 深度学习
 ---
 
