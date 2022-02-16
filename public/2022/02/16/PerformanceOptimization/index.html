@@ -71,6 +71,8 @@
  
 
       
+
+
     </header>
      
     <div class="article-meta">
@@ -87,7 +89,7 @@
   
     <div class="article-entry" itemprop="articleBody">
        
-  <p><a target="_blank" rel="noopener" href="https://g-next.antv.vision/zh/docs/guide/advanced-topics/performance-optimization">引用地址</a></p>
+  <p>此文章多为<a target="_blank" rel="noopener" href="https://g-next.antv.vision/zh/docs/guide/advanced-topics/performance-optimization">引用</a></p>
 <h3 id="方法一：减少-Draw-Call"><a href="#方法一：减少-Draw-Call" class="headerlink" title="方法一：减少 Draw Call"></a>方法一：减少 Draw Call</h3><p>首先我们需要引入一个核心概念 Draw Call，以下介绍的优化方法大多围绕它展开。</p>
 <h4 id="什么是-Draw-Call"><a href="#什么是-Draw-Call" class="headerlink" title="什么是 Draw Call"></a>什么是 Draw Call</h4><p>Draw Call就是CPU调用图形编程接口,比如DirectX或OpenGL,来命令GPU进行渲染的操作。<br>为啥 draw call 多了就会影响性能呢？因为在 CPU 和 GPU 进行异步协作的过程中，会向 command buffer 中提交需要 GPU 执行的命令，例如设置状态、绘制或者拷贝资源。CPU 准备这些命令的速度与 GPU 执行的速度存在不小差异，这就造成了性能瓶颈。</p>
 <p>下图分别展示了每一帧中 CPU 和 GPU 的时间线，可以看出 GPU 总是在执行上一帧 CPU 提交的命令，与此同时 CPU 在准备下一帧的命令。当这些绘制命令数量不多时，两者协作没问题，但如果数量很多，GPU 在做完这一帧的渲染任务后就不得不等待，也就无法在 16ms 内完成了，这造成了卡顿的体感。<br><img src="/images/drawcallprocess.png" /></p>

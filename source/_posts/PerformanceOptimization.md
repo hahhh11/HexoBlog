@@ -4,7 +4,7 @@ date: 2022-02-16 11:57:39
 tags: Canvas
 ---
 
-[引用地址](https://g-next.antv.vision/zh/docs/guide/advanced-topics/performance-optimization)
+此文章多为[引用](https://g-next.antv.vision/zh/docs/guide/advanced-topics/performance-optimization)
 
 ### 方法一：减少 Draw Call
 

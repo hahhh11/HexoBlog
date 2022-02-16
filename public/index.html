@@ -126,6 +126,8 @@
  
 
       
+
+
     </header>
      
     <div class="article-meta">
@@ -136,7 +138,7 @@
       
     <div class="article-entry" itemprop="articleBody">
        
-  <p><a target="_blank" rel="noopener" href="https://g-next.antv.vision/zh/docs/guide/advanced-topics/performance-optimization">引用地址</a></p>
+  <p>此文章多为<a target="_blank" rel="noopener" href="https://g-next.antv.vision/zh/docs/guide/advanced-topics/performance-optimization">引用</a></p>
 <h3 id="方法一：减少-Draw-Call"><a href="#方法一：减少-Draw-Call" class="headerlink" title="方法一：减少 Draw Call"></a>方法一：减少 Draw Call</h3><p>首先我们需要引入一个核心概念 Draw Call，以下介绍的优化方法大多围绕它展开。</p>
 <h4 id="什么是-Draw-Call"><a href="#什么是-Draw-Call" class="headerlink" title="什么是 Draw Call"></a>什么是 Draw Call</h4><p>Draw Call就是CPU调用图形编程接口,比如DirectX或OpenGL,来命令GPU进行渲染的操作。<br>为啥 draw call 多了就会影响性能呢？因为在 CPU 和 GPU 进行异步协作的过程中，会向 command buffer 中提交需要 GPU 执行的命令，例如设置状态、绘制或者拷贝资源。CPU 准备这些命令的速度与 GPU 执行的速度存在不小差异，这就造成了性能瓶颈。</p>
 <p>下图分别展示了每一帧中 CPU 和 GPU 的时间线，可以看出 GPU 总是在执行上一帧 CPU 提交的命令，与此同时 CPU 在准备下一帧的命令。当这些绘制命令数量不多时，两者协作没问题，但如果数量很多，GPU 在做完这一帧的渲染任务后就不得不等待，也就无法在 16ms 内完成了，这造成了卡顿的体感。<br><img src="/images/drawcallprocess.png" /></p>
@@ -222,6 +224,12 @@
  
 
       
+
+    <div class="article-author" >
+        作者：98Percent 
+    </div>
+
+
     </header>
      
     <div class="article-meta">
@@ -232,7 +240,48 @@
       
     <div class="article-entry" itemprop="articleBody">
        
-   
+  <h3 id="什么是向量"><a href="#什么是向量" class="headerlink" title="什么是向量"></a>什么是向量</h3><p>在讲什么是矩阵之前，我们需要来了解什么是向量：<br>向量是从研究一个数（例如：666） 拓展到研究一组数（例如：（6，66，666））的表示方法</p>
+<h4 id="向量有什么用？——有两个视角来看待"><a href="#向量有什么用？——有两个视角来看待" class="headerlink" title="向量有什么用？——有两个视角来看待"></a>向量有什么用？——有两个视角来看待</h4><h6 id="最基础的使用用来表示方向"><a href="#最基础的使用用来表示方向" class="headerlink" title="最基础的使用用来表示方向:"></a>最基础的使用用来表示方向:</h6><img src="/images/whatisvector/img1.png" />
+
+<h6 id="更抽象的n维向量："><a href="#更抽象的n维向量：" class="headerlink" title="更抽象的n维向量："></a>更抽象的n维向量：</h6><img src="/images/whatisvector/img2.png" />
+
+<h3 id="向量的基本运算："><a href="#向量的基本运算：" class="headerlink" title="向量的基本运算："></a>向量的基本运算：</h3><h5 id="1、向量加法："><a href="#1、向量加法：" class="headerlink" title="1、向量加法："></a>1、向量加法：</h5><img src="/images/whatisvector/img3.png" />
+由图示可知：（5，2）<sup>T</sup>+（2，5）<sup>T</sup>=（5+2，2+5）<sup>T</sup>=（7，7）<sup>T</sup>
+注：上标T标识该向量是一个列向量，我们通常使用的向量都是列向量，表示形式如下：
+
+<img src="/images/whatisvector/img4.png" />
+向量的加法是由每个向量的每一个元素相加组成的新的向量
+
+<h5 id="2、向量的数量乘法："><a href="#2、向量的数量乘法：" class="headerlink" title="2、向量的数量乘法："></a>2、向量的数量乘法：</h5><img src="/images/whatisvector/img5.png" />
+
+<p>向量的数量乘法是向量内的每一个k值（k是一个数）</p>
+<h6 id="向量运算遵循的基本性质："><a href="#向量运算遵循的基本性质：" class="headerlink" title="向量运算遵循的基本性质："></a>向量运算遵循的基本性质：</h6><img src="/images/whatisvector/img6.png" />
+
+<h3 id="零向量："><a href="#零向量：" class="headerlink" title="零向量："></a>零向量：</h3><p>对于任何一个向量，都有一个向量O，满足该向量加上O等于该向量本身，零向量是所有元素都为0的向量，它没有方向。</p>
+<h3 id="向量的长度（向量的模）："><a href="#向量的长度（向量的模）：" class="headerlink" title="向量的长度（向量的模）："></a>向量的长度（向量的模）：</h3><img src="/images/whatisvector/img7.png" />
+
+<p>如图所示：向量的长度用勾股定理就能得出 向量的长度是</p>
+<img src="/images/whatisvector/img8.png" />
+
+<p>一般用双数线（单数线）包裹起来表示：</p>
+<img src="/images/whatisvector/img9.png" />
+
+<p>推到n维可以得出计算公式为：</p>
+<img src="/images/whatisvector/img10.png" />
+
+<h3 id="单位向量："><a href="#单位向量：" class="headerlink" title="单位向量："></a>单位向量：</h3><p>单位向量是由该向量除以该向量的模，它的长度为1，只表示这个向量的方向，单位向量有无数个。</p>
+<img src="/images/whatisvector/img11.png" />
+
+<h3 id="标准单位向量"><a href="#标准单位向量" class="headerlink" title="标准单位向量"></a>标准单位向量</h3><p>二维空间中有两个标准单位向量（1，0）、（0，1）<br>三维空间中有三个标准单位向量（1，0，0）、（0，1，0）、（0，0，1）<br>n维空间中有n个标准单位向量（1，0…..，0）、（0，1……，0）、（0，0……，1）</p>
+<h3 id="向量的点乘（也叫内积）（dot）"><a href="#向量的点乘（也叫内积）（dot）" class="headerlink" title="向量的点乘（也叫内积）（dot）"></a>向量的点乘（也叫内积）（dot）</h3><p>两个向量相乘结果是一个数</p>
+<img src="/images/whatisvector/img12.png" />
+
+<p>向量的乘法是将两个向量的每一项相乘再相加，同时等于这两个向量的模相乘再乘cos这两个向量直接的夹角θ<br>我们一般用向量的点乘可以反向求得这两个向量直接的角度是多少<br>同样我们能知道一个向量在另一个向量上的贡献程度，如下图：</p>
+<img src="/images/whatisvector/img13.png" />
+
+<p>当两个向量相乘时如果结果为0，那么这两个向量就是互相垂直的，夹角为90°<br>当两个向量相乘时如果结果大于0，那么这两个向量的夹角为锐角<br>当两个向量相乘时如果结果小于0，那么这两个向量的夹角为钝角</p>
+<h3 id="应用："><a href="#应用：" class="headerlink" title="应用："></a>应用：</h3><p>当我们使用的向量是n维向量时以电影为例（向量里的数可能代表一部电影的评分、类型、上线时间、票房、导演、演员等数据），我们可以通过计算n维向量的角度，如果角度越小则说明两部电影越相似，相反则说明两部电影无关，可以将其应用于相似电影的推荐。</p>
+ 
       <!-- reward -->
       
     </div>
@@ -271,6 +320,8 @@
  
 
       
+
+
     </header>
      
     <div class="article-meta">
@@ -322,6 +373,8 @@
  
 
       
+
+
     </header>
      
     <div class="article-meta">
