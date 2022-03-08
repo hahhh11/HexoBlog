@@ -6,3 +6,8 @@
     </div>
 
 <% } %>
+<% if (post.author && post.author.length){ %>
+    <div class="<%= class_name %>" <% if (!index){ %> style="text-align: center" <% }%>>
+        作者：<%= post.author %> 
+    </div>
+<% } %>

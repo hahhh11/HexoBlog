@@ -11,7 +11,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"
       />
-      <title>活动案例 |  </title>
+      <title>tauri的使用探索 |  </title>
   <meta name="generator" content="hexo-theme-ayer">
       
       <link rel="shortcut icon" href="/favicon.ico" />
@@ -55,8 +55,8 @@
     <main class="content on">
       <section class="outer">
   <article
-  id="page-"
-  class="article article-type-page"
+  id="post-HowTouseTauri"
+  class="article article-type-post"
   itemscope
   itemprop="blogPost"
   data-scroll-reveal
@@ -66,7 +66,7 @@
     <header class="article-header">
        
 <h1 class="article-title sea-center" style="border-left:0" itemprop="name">
-  活动案例
+  tauri的使用探索
 </h1>
  
 
@@ -74,135 +74,48 @@
 
 
     </header>
-       
+     
+    <div class="article-meta">
+      <a href="/2022/02/09/HowTouseTauri/" class="article-date">
+  <time datetime="2022-02-09T06:32:19.000Z" itemprop="datePublished">2022-02-09</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E5%85%B6%E4%BB%96/">其他</a>
+  </div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
     <div class="article-entry" itemprop="articleBody">
        
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-<style>
-    .container{
-        margin:0px auto 20px;
-    }
-    .preview{
-        text-decoration:none;
-        color:#313131;
-    }
-    .sidebar{
-        position: fixed;
-        z-index: 9;
-        left: -8rem;
-        bottom: 0;
-        width: 8rem;
-        height: 100%;
-        background-color: rgba(0,0,0,.8);
-    }
-    .navbar .nav .nav-item-link {
-        display: block;
-        padding: 1rem;
-        color: #bbb;
-        text-decoration: none;
-        cursor: pointer;
-    }
-    .navbar-bottom {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        font-size: 2rem;
-    }
-    .navbar{
-        display:block;
-        position: relative;
-        padding-top: 3rem;
-        text-align: center;
-    }
-    .nav{
-        display:block;
-        list-style: none;
-        padding-left: 0;
-        margin-left: 0;
-    }
-    .temp-item{
-        width: 205px;
-        padding: 10px 0;
-        margin: 10px auto;    
-        border-radius: 18px;
-        background: #f4f4f4;
-        box-shadow:  3px 3px 6px #bebebe, 
-                    -3px -3px 6px #ffffff;
-    }
-    .temp-item:hover{
-        box-shadow: inset -6px -6px 20px rgba(255,255,255,0.7), inset 6px 6px 20px rgba(0,0,0,0.08);
-    }
-    .temp-item-content{
-        padding:8px;
-        height: 34px;
-    }
-    .temp-item-content h4{
-        margin: 0.5rem;
-    }
-    .temp-item-content .play{
-        position: relative;
-        top: -24px;
-        left: 155px;
-        border-radius: 104px;
-        background: #f9f9f9;
-        padding: 5px;
-        box-shadow: -6px -6px 20px rgb(255 255 255), 6px 6px 20px rgb(0 0 0 / 10%);
-    }
-    .ifr{
-        display: table;
-        border-radius:8px;
-    }
-</style>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-
-<div class="container" >
-    <h3><a href="#98" class="headerlink" title="98%"></a>98%</h3>
-    <div id="98%" class="row row-cols-sm-1 row-cols-md-3">
-    </div>
-    <h3><a href="#Mr-Kwon" class="headerlink" title="Mr.Kwon"></a>Mr.Kwon</h3><div style="display: flex;"></div>
-    <div id="MrKwon" class="row row-cols-sm-1 row-cols-md-3">
-    </div>
-</div>
-
-<script>
-    var config = {
-        "98%":[{"name":"FlappyBird",link:"https://www.aichaos.cn/98Percent/FlappyBird/released/index.html"}],
-        "MrKwon":[
-            {"name":"2048 合成",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=2048"},
-            {"name":"六边形消除",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=hextris"},
-            {"name":"五子棋",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=gobang"},
-            {"name":"一笔画",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=oneStroke"},
-            {"name":"消消乐",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=xiaoxiaole"},
-            {"name":"拼图块",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=puzzleBlock"},
-        ]
-    }
-
-    var keys = Object.keys(config)
-    keys.forEach(key=>{
-        if(config[key] && config[key].length>0){
-            var child = ""
-            config[key].forEach(item=>{
-                var temp = `
-                    <div class="col">
-                        <div class="temp-item">
-                            <iframe class="ifr m-auto" height=301.5 width=187.5 src="${item.link}" frameborder=0  ></iframe>
-                            <a class="preview" href="https://www.aichaos.cn/preview/?purl=${encodeURIComponent(item.link)}">
-                            <div class="temp-item-content">
-                                <h4>${item.name}</h4>
-                                <span class="play">▶</span>
-                            </div>
-                            </a>
-                        </div>
-                    </div>
-                `
-                child+=temp
-            })
-            console.log(child)
-            document.getElementById(key).innerHTML = child
-        }
-        
-    })
-</script> 
+  <h2 id="什么是tauri"><a href="#什么是tauri" class="headerlink" title="什么是tauri"></a>什么是<a target="_blank" rel="noopener" href="https://tauri.studio/">tauri</a></h2><p>Tauri 是一个跨语言的通用系统，具有很高的组合性，允许工程师开发各种各样的应用。她使用 Rust 工具和在 Webview 中渲染HTML 相结合构建桌面应用。Tauri构建的应用可以用任意数量的 JS API / Rust API 组合，使 Webview 可以通过消息控制整个系统。<br>任何可以在网站上显示东西，都可以在 Tuari 中显示！</p>
+<h3 id="为什么使用tauri"><a href="#为什么使用tauri" class="headerlink" title="为什么使用tauri"></a>为什么使用tauri</h3><p>够小</p>
+<h3 id="如何上手"><a href="#如何上手" class="headerlink" title="如何上手"></a>如何上手</h3><h4 id="mac环境配置"><a href="#mac环境配置" class="headerlink" title="mac环境配置"></a>mac环境配置</h4><p>需要安装 gcc 和 xcode-selec和Rustc依次执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">brew install gcc</span><br><span class="line">xcode-select --install</span><br><span class="line">curl --proto <span class="string">&#x27;=https&#x27;</span> --tlsv1.2 -sSf https://sh.rustup.rs | sh</span><br></pre></td></tr></table></figure>
+<h4 id="Windows环境配置"><a href="#Windows环境配置" class="headerlink" title="Windows环境配置"></a>Windows环境配置</h4><p>点击跳转下载安装 <a target="_blank" rel="noopener" href="https://visualstudio.microsoft.com/visual-cpp-build-tools/">Visual Studio C++</a> 、 <a target="_blank" rel="noopener" href="https://developer.microsoft.com/en-us/microsoft-edge/webview2/#download-section">WebView2</a> 、Rustc（<a target="_blank" rel="noopener" href="https://win.rustup.rs/x86_64">64位下载</a>｜<a target="_blank" rel="noopener" href="https://win.rustup.rs/i686">32位下载</a>）</p>
+<h4 id="公用环境配置（mac、Windows）"><a href="#公用环境配置（mac、Windows）" class="headerlink" title="公用环境配置（mac、Windows）"></a>公用环境配置（mac、Windows）</h4><h5 id="1-修改host文件加速-github"><a href="#1-修改host文件加速-github" class="headerlink" title="1.修改host文件加速 github"></a>1.修改host文件加速 github</h5><p>#mac 打开访达，commnd+shift+g，输入/etc/hosts<br>#windows  打开文件夹访问 C:\Windows\System32\drivers\etc</p>
+<p>在hosts的最后加上<br>140.82.112.3 github.com<br>199.232.69.194 github.global.ssl.fastly.net</p>
+<h5 id="2-node环境（node-12以上）建议替换npm或者yarn的源（建议使用nrm、yrm-如下"><a href="#2-node环境（node-12以上）建议替换npm或者yarn的源（建议使用nrm、yrm-如下" class="headerlink" title="2.node环境（node 12以上）建议替换npm或者yarn的源（建议使用nrm、yrm 如下);"></a>2.node环境（node 12以上）建议替换npm或者yarn的源（建议使用nrm、yrm 如下);</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">npm install -g nrm </span><br><span class="line">nrm <span class="built_in">test</span> </span><br><span class="line">nrm use taobao</span><br><span class="line"></span><br><span class="line">npm install -g yarn </span><br><span class="line">npm install -g yrm </span><br><span class="line">yrm <span class="built_in">test</span> </span><br><span class="line">yrm use tabao</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">rustc --version //检查rust版本</span><br><span class="line">cargo --version //检查cargo版本</span><br></pre></td></tr></table></figure>
+<p>修改cargo源<br>mac版本 </p>
+<h5 id="3-修改rust的Cargo源"><a href="#3-修改rust的Cargo源" class="headerlink" title="3.修改rust的Cargo源"></a>3.修改rust的Cargo源</h5><p>先检查rust是否安装成功</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rustc --version //检查rust版本</span><br><span class="line">cargo --version //检查cargo版本</span><br></pre></td></tr></table></figure>
+<p>再打开.cargo文件夹下面的config文件,mac通过 vim $HOME/.cargo/config 进入</p>
+<p>window通过安装的时候选择的目录可以进入直接编辑就可以了</p>
+<p>全改成下面的字段如果没用这个文件直接创建就可以了。</p>
+<p>[source.crates-io]<br>registry = “<a target="_blank" rel="noopener" href="https://github.com/rust-lang/crates.io-index&quot;">https://github.com/rust-lang/crates.io-index&quot;</a></p>
+<p>#替换成你偏好的镜像源<br>replace-with = ‘sjtu’</p>
+<p>#清华大学<br>#[source.tuna]<br>#registry = “<a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git&quot;">https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git&quot;</a></p>
+<p>#中国科学技术大学<br>#[source.ustc]<br>#registry = “git://mirrors.ustc.edu.cn/crates.io-index”</p>
+<p>#上海交通大学<br>[source.sjtu]<br>registry = “<a target="_blank" rel="noopener" href="https://mirrors.sjtug.sjtu.edu.cn/git/crates.io-index&quot;">https://mirrors.sjtug.sjtu.edu.cn/git/crates.io-index&quot;</a></p>
+<p>#rustcc社区<br>#[source.rustcc]<br>#registry = “git://crates.rustcc.cn/crates.io-index”</p>
+<h5 id="4-修改完毕安装tauri-bundler"><a href="#4-修改完毕安装tauri-bundler" class="headerlink" title="4.修改完毕安装tauri-bundler"></a>4.修改完毕安装tauri-bundler</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cargo install tauri-bundler --force</span><br></pre></td></tr></table></figure>
+<p>#可能需要很长时间不要着急<br>#安装完毕过后执行<br>mac:source $HOME/.cargo/env或者重启命令行<br>windows:重启命令行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//结束后全局安装下</span><br><span class="line">cargo install tauri-cli --version ^1.0.0-beta</span><br></pre></td></tr></table></figure> 
       <!-- reward -->
       
     </div>
@@ -266,7 +179,7 @@
     <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.aichaos.cn/temps/" alt="微信分享二维码">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.aichaos.cn/2022/02/09/HowTouseTauri/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -275,6 +188,25 @@
   </div>
 
    
+  <nav class="article-nav">
+    
+      <a href="/2022/02/15/WhatIsYOLO/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            什么是YOLO
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2021/07/21/WhatIsMatrix/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">什么是矩阵（Matrix）</div>
+      </a>
+    
+  </nav>
+
    
 <!-- valine评论 -->
 <div id="vcomments-box">
@@ -324,7 +256,8 @@
 </style>
 
  
-    
+   
+     
 </article>
 
 </section>
@@ -447,6 +380,22 @@
 <script src="/js/lazyload.min.js"></script>
 
 <!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery-modal@0.9.2/jquery.modal.min.js"></script>
 <link

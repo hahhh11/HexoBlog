@@ -6,7 +6,7 @@
   <link href="https://www.aichaos.cn/atom.xml" rel="self"/>
   
   <link href="https://www.aichaos.cn/"/>
-  <updated>2022-02-06T06:26:55.233Z</updated>
+  <updated>2022-02-16T06:31:35.047Z</updated>
   <id>https://www.aichaos.cn/</id>
   
   <author>
@@ -17,11 +17,61 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>性能优化</title>
+    <link href="https://www.aichaos.cn/2022/02/16/PerformanceOptimization/"/>
+    <id>https://www.aichaos.cn/2022/02/16/PerformanceOptimization/</id>
+    <published>2022-02-16T03:57:39.000Z</published>
+    <updated>2022-02-16T06:31:35.047Z</updated>
+    
+    <content type="html"><![CDATA[<p>此文章多为<a href="https://g-next.antv.vision/zh/docs/guide/advanced-topics/performance-optimization">引用</a></p><h3 id="方法一：减少-Draw-Call"><a href="#方法一：减少-Draw-Call" class="headerlink" title="方法一：减少 Draw Call"></a>方法一：减少 Draw Call</h3><p>首先我们需要引入一个核心概念 Draw Call，以下介绍的优化方法大多围绕它展开。</p><h4 id="什么是-Draw-Call"><a href="#什么是-Draw-Call" class="headerlink" title="什么是 Draw Call"></a>什么是 Draw Call</h4><p>Draw Call就是CPU调用图形编程接口,比如DirectX或OpenGL,来命令GPU进行渲染的操作。<br>为啥 draw call 多了就会影响性能呢？因为在 CPU 和 GPU 进行异步协作的过程中，会向 command buffer 中提交需要 GPU 执行的命令，例如设置状态、绘制或者拷贝资源。CPU 准备这些命令的速度与 GPU 执行的速度存在不小差异，这就造成了性能瓶颈。</p><p>下图分别展示了每一帧中 CPU 和 GPU 的时间线，可以看出 GPU 总是在执行上一帧 CPU 提交的命令，与此同时 CPU 在准备下一帧的命令。当这些绘制命令数量不多时，两者协作没问题，但如果数量很多，GPU 在做完这一帧的渲染任务后就不得不等待，也就无法在 16ms 内完成了，这造成了卡顿的体感。<br><img src="/images/drawcallprocess.png" /></p><h4 id="如何减少-Draw-Call"><a href="#如何减少-Draw-Call" class="headerlink" title="如何减少 Draw Call"></a>如何减少 Draw Call</h4><p>因为以上原因，我们需要减少 Draw Call 的次数，能少画就少画，能不画就不画。</p><p>我们通常使用以下方法进行Draw Call的优化：</p><h5 id="剔除"><a href="#剔除" class="headerlink" title="剔除"></a>剔除</h5><p>在场景中的仅有一部分可见的情况下，我们通过剔除暂时不可见的元素，就能减少绘制命令的数量。<br><img src="/images/drawcallmethod_img1.png" /></p><p>在判断一个图形是否在视口内时，我们通常会使用一种称作“包围盒”的结构。图形可以千变万化，但总可以找到一个包裹住它的最小基础几何结构，这个结构可以是“包围盒”，也可以是“包围球”，总之是为了后续计算元素与视口求交时方便。我们选择轴对齐包围盒。推广到 3D 场景中，视口也变成了视锥。<br><img src="/images/drawcallmethod_img2.png" /></p><p>在每一帧都在 CPU 端进行这样的求交运算开销不小，特别当场景中图形数量较多时。另外在 3D 场景中视锥与包围盒（立方体）各个面的求交开销更大，因此我们也采用了一系列优化方法：</p><p>在 3D 场景进行视锥剔除时，我们尽量使用了如下<a href="https://github.com/antvis/GWebGPUEngine/issues/3">加速检测方法</a>：</p><ol><li>基础相交测试 the basic intersection test</li><li>平面一致性测试 the plane-coherency test</li><li>八分测试 the octant test</li><li>标记 masking</li><li>平移旋转一致性测试 TR coherency test<br>更多可以参考：</li></ol><ul><li><a href="http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/pubs/vfcullbox.pdf.gz">Optimized View Frustum Culling Algorithms for Bounding Boxes</a></li><li><a href="http://old.cescg.org/CESCG-2002/DSykoraJJelinek/">Efficient View Frustum Culling</a></li><li><a href="https://zhuanlan.zhihu.com/p/55915345">视锥体剔除 AABB 和 OBB 包围盒的优化方法</a></li></ul><h5 id="其他剔除手段："><a href="#其他剔除手段：" class="headerlink" title="其他剔除手段："></a>其他剔除手段：</h5><p>在 WebGL / WebGPU 这样的渲染 API 中，还提供了其他剔除手段：</p><p>背面剔除，<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/WebGLRenderingContext/cullFace">gl.cullFace</a><br>遮挡剔除，<a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/createQuery">gl.createQuery</a>。至少需要 WebGL2</p><h3 id="方法二：“脏矩形”渲染"><a href="#方法二：“脏矩形”渲染" class="headerlink" title="方法二：“脏矩形”渲染"></a>方法二：“脏矩形”渲染</h3><p>有一种常见的交互是通过鼠标高亮某个图形。此时场景中仅有一小部分发生了改变，擦除画布中的全部图形再重绘就显得没有必要了。类比 React diff 算法能够找出真正变化的最小部分，“脏矩形”渲染能尽可能复用上一帧的渲染结果，仅绘制变更部分，特别适合 Canvas2D API。</p><h4 id="什么是“脏矩形”"><a href="#什么是“脏矩形”" class="headerlink" title="什么是“脏矩形”"></a>什么是“脏矩形”</h4><p>脏矩形是2D图形性能优化一个重要的概念。</p><p>简单说脏矩形，就是画面刷新时，产生变化而需要重绘的舞台局部区域。</p><p>   什么叫脏，即什么情况下会弄脏？</p><p>   当我们的游戏中的元素 发生位置，大小，方向，动画，添加，删除等操作时，那么该元素原来对应的区域会弄脏，同时，新对应的区域也同样被弄脏。</p><p>使用脏矩形将大大减少无用的渲染工作量，降低额外性能消耗。</p><h4 id="实现“脏矩形”的思路"><a href="#实现“脏矩形”的思路" class="headerlink" title="实现“脏矩形”的思路"></a>实现“脏矩形”的思路</h4><ul><li>当鼠标悬停在圆上时，我们知道了对应的“脏矩形”，也就是这个圆的包围盒</li><li>找到场景中与这个包围盒区域相交的其他图形，这里找到了另一个矩形</li><li>使用 clearRect 清除这个“脏矩形”，代替清空整个画布</li><li>按照 z-index 依次绘制一个矩形和圆形</li><li><img src="/images/dirtyRect.png" /></li></ul><p>在以上求交与区域查询的过程中，我们可以复用剔除方案中的优化手段，例如加速结构。</p><p>显然当动态变化的对象数目太多时，该优化手段就失去了意义，试想经过一番计算合并后的“脏矩形”几乎等于整个画布，那还不如直接清空重绘所有对象。因此例如 Pixi.js 这样的 2D 游戏渲染引擎就不考虑内置。</p><p>但在可视化这类相对静态的场景下就显得有意义了，例如在触发拾取后只更新图表的局部，其余部分保持不变。</p><h3 id="方法三：批处理（batching）"><a href="#方法三：批处理（batching）" class="headerlink" title="方法三：批处理（batching）"></a>方法三：批处理（batching）</h3><p>以上两种方法当然有不适合的场景，例如希望总览一个大规模图场景的全貌时，无法应用剔除（所有节点/边都在视口内）。拖拽移动整个场景时，“脏矩阵”渲染效果也不佳（整个场景都变“脏”了）。</p><p>除了使用一些上层的 LOD 手段，例如缩放等级较高时，隐藏掉边和文本（因为也看不清），以此减少绘制命令数量之外，draw call batching 是非常合适的。</p><p>不同于 Canvas2D / Skia 提供的抽象层次较高的绘制 API，WebGL / WebGPU 提供了更低层次的 API，可以让我们将一批“同类”图形合并成一次绘制命令。在渲染引擎中，常用于渲染类似森林中大量树木这种场景。图场景同样十分契合，场景中包含大量同类但简单的图形（节点、边）。</p><h3 id="离屏Canvas（Offscreen-Canvas）"><a href="#离屏Canvas（Offscreen-Canvas）" class="headerlink" title="离屏Canvas（Offscreen Canvas）"></a>离屏Canvas（Offscreen Canvas）</h3><p>仅 g-webgl 下生效。</p><p>当主线程需要处理较重的交互时，我们可以将 Canvas 的渲染工作交给 Worker 完成，主线程仅负责同步结果。目前很多渲染引擎已经支持，例如 Babylon.js。</p><p>为了支持该特性，引擎本身并不需要做很多改造，只要能够保证 g-webgl 能在 Worker 中运行即可。</p><h5 id="局限性"><a href="#局限性" class="headerlink" title="局限性"></a>局限性</h5><p>由于运行在 Worker 环境，用户需要手动处理一些 DOM 相关的事件。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;此文章多为&lt;a href=&quot;https://g-next.antv.vision/zh/docs/guide/advanced-topics/performance-optimization&quot;&gt;引用&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&quot;方法一：减少-Draw-Call&quot;&gt;&lt;a </summary>
+      
+    
+    
+    
+    <category term="Canvas相关" scheme="https://www.aichaos.cn/categories/Canvas%E7%9B%B8%E5%85%B3/"/>
+    
+    
+    <category term="Canvas" scheme="https://www.aichaos.cn/tags/Canvas/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>什么是YOLO</title>
+    <link href="https://www.aichaos.cn/2022/02/15/WhatIsYOLO/"/>
+    <id>https://www.aichaos.cn/2022/02/15/WhatIsYOLO/</id>
+    <published>2022-02-15T09:49:07.000Z</published>
+    <updated>2022-02-16T06:31:43.113Z</updated>
+    
+    <content type="html"><![CDATA[<p>YOLO是You only look once的缩写，是目前最先进的实时物体检测算法之一，目前已经升级到了V5版本。</p><h4 id="优势："><a href="#优势：" class="headerlink" title="优势："></a>优势：</h4><p>YOLO非常的快速和准确，只需更改模型的大小即可在速度和精度之间轻松权衡，无需重新训练！<br>与基于分类器的系统相比，YOLO具有几个优点。它在测试时查看整个图像，以便其预测由图像中的全局上下文提供信息。它还通过单个网络评估进行预测，这与R-CNN等系统不同，R-CNN需要数千个图像才能完成。这使得它非常快，比R-CNN快1000倍以上，比Fast R-CNN快100倍。YOLO模型以每秒45帧的速度实时处理图像。该网络的较小版本Fast YOLO每秒处理惊人的155帧，同时仍能实现其他实时探测器的两倍mAP</p><h4 id="它是如何运作的："><a href="#它是如何运作的：" class="headerlink" title="它是如何运作的："></a>它是如何运作的：</h4><p>以前的检测系统会重新调整分类器或定位器的用途以执行检测。他们将模型应用于多个位置和比例的图像。图像的高评分区域被视为检测到的目标区域。</p><p>YOLO使用完全不同的方法。它将单个神经网络应用于完整图像。该网络将图像划分为多个区域，并预测每个区域的边界框和概率。这些边界框按预测概率加权。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;YOLO是You only look once的缩写，是目前最先进的实时物体检测算法之一，目前已经升级到了V5版本。&lt;/p&gt;
+&lt;h4 id=&quot;优势：&quot;&gt;&lt;a href=&quot;#优势：&quot; class=&quot;headerlink&quot; title=&quot;优势：&quot;&gt;&lt;/a&gt;优势：&lt;/h4&gt;&lt;p&gt;</summary>
+      
+    
+    
+    
+    <category term="深度学习" scheme="https://www.aichaos.cn/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    
+    <category term="深度学习" scheme="https://www.aichaos.cn/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
     <title>tauri的使用探索</title>
-    <link href="https://www.aichaos.cn/2022/01/07/hello-world/"/>
-    <id>https://www.aichaos.cn/2022/01/07/hello-world/</id>
-    <published>2022-01-07T13:54:59.127Z</published>
-    <updated>2022-02-06T06:26:55.233Z</updated>
+    <link href="https://www.aichaos.cn/2022/02/09/HowTouseTauri/"/>
+    <id>https://www.aichaos.cn/2022/02/09/HowTouseTauri/</id>
+    <published>2022-02-09T06:32:19.000Z</published>
+    <updated>2022-02-16T06:32:30.798Z</updated>
     
     <content type="html"><![CDATA[<h2 id="什么是tauri"><a href="#什么是tauri" class="headerlink" title="什么是tauri"></a>什么是<a href="https://tauri.studio/">tauri</a></h2><p>Tauri 是一个跨语言的通用系统，具有很高的组合性，允许工程师开发各种各样的应用。她使用 Rust 工具和在 Webview 中渲染HTML 相结合构建桌面应用。Tauri构建的应用可以用任意数量的 JS API / Rust API 组合，使 Webview 可以通过消息控制整个系统。<br>任何可以在网站上显示东西，都可以在 Tuari 中显示！</p><h3 id="为什么使用tauri"><a href="#为什么使用tauri" class="headerlink" title="为什么使用tauri"></a>为什么使用tauri</h3><p>够小</p><h3 id="如何上手"><a href="#如何上手" class="headerlink" title="如何上手"></a>如何上手</h3><h4 id="mac环境配置"><a href="#mac环境配置" class="headerlink" title="mac环境配置"></a>mac环境配置</h4><p>需要安装 gcc 和 xcode-selec和Rustc依次执行</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">brew install gcc</span><br><span class="line">xcode-select --install</span><br><span class="line">curl --proto <span class="string">&#x27;=https&#x27;</span> --tlsv1.2 -sSf https://sh.rustup.rs | sh</span><br></pre></td></tr></table></figure><h4 id="Windows环境配置"><a href="#Windows环境配置" class="headerlink" title="Windows环境配置"></a>Windows环境配置</h4><p>点击跳转下载安装 <a href="https://visualstudio.microsoft.com/visual-cpp-build-tools/">Visual Studio C++</a> 、 <a href="https://developer.microsoft.com/en-us/microsoft-edge/webview2/#download-section">WebView2</a> 、Rustc（<a href="https://win.rustup.rs/x86_64">64位下载</a>｜<a href="https://win.rustup.rs/i686">32位下载</a>）</p><h4 id="公用环境配置（mac、Windows）"><a href="#公用环境配置（mac、Windows）" class="headerlink" title="公用环境配置（mac、Windows）"></a>公用环境配置（mac、Windows）</h4><h5 id="1-修改host文件加速-github"><a href="#1-修改host文件加速-github" class="headerlink" title="1.修改host文件加速 github"></a>1.修改host文件加速 github</h5><p>#mac 打开访达，commnd+shift+g，输入/etc/hosts<br>#windows  打开文件夹访问 C:\Windows\System32\drivers\etc</p><p>在hosts的最后加上<br>140.82.112.3 github.com<br>199.232.69.194 github.global.ssl.fastly.net</p><h5 id="2-node环境（node-12以上）建议替换npm或者yarn的源（建议使用nrm、yrm-如下"><a href="#2-node环境（node-12以上）建议替换npm或者yarn的源（建议使用nrm、yrm-如下" class="headerlink" title="2.node环境（node 12以上）建议替换npm或者yarn的源（建议使用nrm、yrm 如下);"></a>2.node环境（node 12以上）建议替换npm或者yarn的源（建议使用nrm、yrm 如下);</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">npm install -g nrm </span><br><span class="line">nrm <span class="built_in">test</span> </span><br><span class="line">nrm use taobao</span><br><span class="line"></span><br><span class="line">npm install -g yarn </span><br><span class="line">npm install -g yrm </span><br><span class="line">yrm <span class="built_in">test</span> </span><br><span class="line">yrm use tabao</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">rustc --version //检查rust版本</span><br><span class="line">cargo --version //检查cargo版本</span><br></pre></td></tr></table></figure><p>修改cargo源<br>mac版本 </p><h5 id="3-修改rust的Cargo源"><a href="#3-修改rust的Cargo源" class="headerlink" title="3.修改rust的Cargo源"></a>3.修改rust的Cargo源</h5><p>先检查rust是否安装成功</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rustc --version //检查rust版本</span><br><span class="line">cargo --version //检查cargo版本</span><br></pre></td></tr></table></figure><p>再打开.cargo文件夹下面的config文件,mac通过 vim $HOME/.cargo/config 进入</p><p>window通过安装的时候选择的目录可以进入直接编辑就可以了</p><p>全改成下面的字段如果没用这个文件直接创建就可以了。</p><p>[source.crates-io]<br>registry = “<a href="https://github.com/rust-lang/crates.io-index&quot;">https://github.com/rust-lang/crates.io-index&quot;</a></p><p>#替换成你偏好的镜像源<br>replace-with = ‘sjtu’</p><p>#清华大学<br>#[source.tuna]<br>#registry = “<a href="https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git&quot;">https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git&quot;</a></p><p>#中国科学技术大学<br>#[source.ustc]<br>#registry = “git://mirrors.ustc.edu.cn/crates.io-index”</p><p>#上海交通大学<br>[source.sjtu]<br>registry = “<a href="https://mirrors.sjtug.sjtu.edu.cn/git/crates.io-index&quot;">https://mirrors.sjtug.sjtu.edu.cn/git/crates.io-index&quot;</a></p><p>#rustcc社区<br>#[source.rustcc]<br>#registry = “git://crates.rustcc.cn/crates.io-index”</p><h5 id="4-修改完毕安装tauri-bundler"><a href="#4-修改完毕安装tauri-bundler" class="headerlink" title="4.修改完毕安装tauri-bundler"></a>4.修改完毕安装tauri-bundler</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cargo install tauri-bundler --force</span><br></pre></td></tr></table></figure><p>#可能需要很长时间不要着急<br>#安装完毕过后执行<br>mac:source $HOME/.cargo/env或者重启命令行<br>windows:重启命令行</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//结束后全局安装下</span><br><span class="line">cargo install tauri-cli --version ^1.0.0-beta</span><br></pre></td></tr></table></figure>]]></content>
     
@@ -33,6 +83,58 @@
     
     
     
+    <category term="其他" scheme="https://www.aichaos.cn/categories/%E5%85%B6%E4%BB%96/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>什么是矩阵（Matrix）</title>
+    <link href="https://www.aichaos.cn/2021/07/21/WhatIsMatrix/"/>
+    <id>https://www.aichaos.cn/2021/07/21/WhatIsMatrix/</id>
+    <published>2021-07-21T05:47:06.000Z</published>
+    <updated>2022-02-16T06:29:30.741Z</updated>
+    
+    <content type="html"><![CDATA[<p>什么是矩阵？我们说向量是对一个数的拓展，代表一组数，那么矩阵就是对向量的拓展，它代表一组向量。<br>看待矩阵有两种视角——行向量和列向量<br>例如下图就是一个4*4的矩阵它有4行4列，当行数和列数相同时我们叫它——方阵</p><img src="/images/whatismatrix/img1.png" /><p>计算机世界中我们通常使用一个二维数组来表示一个矩阵</p><h3 id="矩阵的基本运算："><a href="#矩阵的基本运算：" class="headerlink" title="矩阵的基本运算："></a>矩阵的基本运算：</h3><h5 id="1、矩阵的加法"><a href="#1、矩阵的加法" class="headerlink" title="1、矩阵的加法"></a>1、矩阵的加法</h5><p>和向量加法一样，矩阵的加法的结果就是矩阵中的每一项相加组成的一个新矩阵</p><img src="/images/whatismatrix/img2.png" /><p>举个例子：</p><img src="/images/whatismatrix/img3.png" /><p>当我们想知道所有学生上下学期每门科目的成绩总和时就只需要A+B就能得出我们想要的结果</p><h5 id="2、矩阵的数量乘法"><a href="#2、矩阵的数量乘法" class="headerlink" title="2、矩阵的数量乘法"></a>2、矩阵的数量乘法</h5><p>和向量数量乘法一样，矩阵的数量乘法的结果就是用标量k去乘以向量中的每一个元素而组成的新矩阵</p><img src="/images/whatismatrix/img4.png" /><p>使用之前的例子，如果我们希望知道所有学生上下学期每一门课程的平均分就只需要1/2*(A+B)就能得出我们想要的结果<br>使用另一个视角再举个例子：</p><img src="/images/whatismatrix/img5.png" /><p>矩阵P是一个3*2的矩阵 其中第一个列向量里表示x轴的坐标，第二个列向量里表示y轴坐标，那么矩阵P这时候就表示一个三角形，对这个P做数量乘法就是对P里的每一个元素做数量乘法，相当于将这个三角行缩放了两倍。</p><h3 id="矩阵遵循的基本性质："><a href="#矩阵遵循的基本性质：" class="headerlink" title="矩阵遵循的基本性质："></a>矩阵遵循的基本性质：</h3><img src="/images/whatismatrix/img6.png" /><h3 id="矩阵和向量相乘："><a href="#矩阵和向量相乘：" class="headerlink" title="矩阵和向量相乘："></a>矩阵和向量相乘：</h3><img src="/images/whatismatrix/img7.png" /><img src="/images/whatismatrix/img8.png" /><p>如上图，这是一个线性方程组，我们可以把它写成矩阵的形式，这是一个矩阵乘以一个向量等于一个向量的形式。</p><img src="/images/whatismatrix/img9.png" /><p>我们可以得出矩阵和向量相乘，等于矩阵的每一行的每一个元素分别乘以这个向量的每个元素再相加</p><img src="/images/whatismatrix/img10.png" /><p>我们可以把矩阵看作是向量的函数（很多小伙伴会说函数？这个我熟！）——f(向量a)=向量b，矩阵就是那个f()</p><h3 id="矩阵和矩阵相乘："><a href="#矩阵和矩阵相乘：" class="headerlink" title="矩阵和矩阵相乘："></a>矩阵和矩阵相乘：</h3><img src="/images/whatismatrix/img11.png" /><p>由矩阵和向量的乘法我们可以推出和矩阵的乘法其实就是把后面的矩阵看作是好多个向量，矩阵和矩阵的乘法其实就是前一个矩阵和后一个矩阵的每一列进行矩阵和向量的乘法计算，最后组成的新矩阵就是两个矩阵相乘的结果。</p><img src="/images/whatismatrix/img12.png" /><p>我们有矩阵P代表红色的三角形，我们希望它的x轴方向扩大1.5倍，y轴方向扩大2倍，就可以使用矩阵的乘法得出一个新的矩阵，它代表的就是图中蓝色的三角形。</p><img src="/images/whatismatrix/img13.png" /><p>矩阵和矩阵相乘时必须保证前一个矩阵的行数和后一个矩阵的列数相同，否则无法进行计算。<br>即Aab<em>Bbc=Cac（下标表示几行几列）<br>另外A</em>B不一定等于B*A，有的甚至交换位置不能相乘。</p><h3 id="矩阵的转置："><a href="#矩阵的转置：" class="headerlink" title="矩阵的转置："></a>矩阵的转置：</h3><p>更多时候我们更愿意把矩阵写成这样：</p><img src="/images/whatismatrix/img14.png" /><p>但是这个矩阵是无法和</p><img src="/images/whatismatrix/img15.png" /><p>相乘，这时候我们就需要使用矩阵的转置。</p><p>我们把这个P矩阵推倒</p><img src="/images/whatismatrix/img16.png" /><p>把原矩阵的列变行，行变列，即</p><img src="/images/whatismatrix/img17.png" /><p>这个时候就能进行矩阵的乘法了</p><h3 id="矩阵转置的性质："><a href="#矩阵转置的性质：" class="headerlink" title="矩阵转置的性质："></a>矩阵转置的性质：</h3><img src="/images/whatismatrix/img18.png" />]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;什么是矩阵？我们说向量是对一个数的拓展，代表一组数，那么矩阵就是对向量的拓展，它代表一组向量。&lt;br&gt;看待矩阵有两种视角——行向量和列向量&lt;br&gt;例如下图就是一个4*4的矩阵它有4行4列，当行数和列数相同时我们叫它——方阵&lt;/p&gt;
+&lt;img src=&quot;/images/wha</summary>
+      
+    
+    
+    
+    <category term="深度学习" scheme="https://www.aichaos.cn/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    
+    <category term="深度学习" scheme="https://www.aichaos.cn/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>什么是向量（Vector）</title>
+    <link href="https://www.aichaos.cn/2021/07/20/WhatIsVector/"/>
+    <id>https://www.aichaos.cn/2021/07/20/WhatIsVector/</id>
+    <published>2021-07-20T03:00:23.000Z</published>
+    <updated>2022-02-16T06:29:39.706Z</updated>
+    
+    <content type="html"><![CDATA[<p>在讲什么是矩阵之前，我们需要来了解什么是向量：<br>向量是从研究一个数（例如：666） 拓展到研究一组数（例如：（6，66，666））的表示方法</p><h4 id="向量有什么用？——有两个视角来看待"><a href="#向量有什么用？——有两个视角来看待" class="headerlink" title="向量有什么用？——有两个视角来看待"></a>向量有什么用？——有两个视角来看待</h4><h6 id="最基础的使用用来表示方向"><a href="#最基础的使用用来表示方向" class="headerlink" title="最基础的使用用来表示方向:"></a>最基础的使用用来表示方向:</h6><img src="/images/whatisvector/img1.png" /><h6 id="更抽象的n维向量："><a href="#更抽象的n维向量：" class="headerlink" title="更抽象的n维向量："></a>更抽象的n维向量：</h6><img src="/images/whatisvector/img2.png" /><h3 id="向量的基本运算："><a href="#向量的基本运算：" class="headerlink" title="向量的基本运算："></a>向量的基本运算：</h3><h5 id="1、向量加法："><a href="#1、向量加法：" class="headerlink" title="1、向量加法："></a>1、向量加法：</h5><img src="/images/whatisvector/img3.png" />由图示可知：（5，2）<sup>T</sup>+（2，5）<sup>T</sup>=（5+2，2+5）<sup>T</sup>=（7，7）<sup>T</sup>注：上标T标识该向量是一个列向量，我们通常使用的向量都是列向量，表示形式如下：<img src="/images/whatisvector/img4.png" />向量的加法是由每个向量的每一个元素相加组成的新的向量<h5 id="2、向量的数量乘法："><a href="#2、向量的数量乘法：" class="headerlink" title="2、向量的数量乘法："></a>2、向量的数量乘法：</h5><img src="/images/whatisvector/img5.png" /><p>向量的数量乘法是向量内的每一个k值（k是一个数）</p><h6 id="向量运算遵循的基本性质："><a href="#向量运算遵循的基本性质：" class="headerlink" title="向量运算遵循的基本性质："></a>向量运算遵循的基本性质：</h6><img src="/images/whatisvector/img6.png" /><h3 id="零向量："><a href="#零向量：" class="headerlink" title="零向量："></a>零向量：</h3><p>对于任何一个向量，都有一个向量O，满足该向量加上O等于该向量本身，零向量是所有元素都为0的向量，它没有方向。</p><h3 id="向量的长度（向量的模）："><a href="#向量的长度（向量的模）：" class="headerlink" title="向量的长度（向量的模）："></a>向量的长度（向量的模）：</h3><img src="/images/whatisvector/img7.png" /><p>如图所示：向量的长度用勾股定理就能得出 向量的长度是</p><img src="/images/whatisvector/img8.png" /><p>一般用双数线（单数线）包裹起来表示：</p><img src="/images/whatisvector/img9.png" /><p>推到n维可以得出计算公式为：</p><img src="/images/whatisvector/img10.png" /><h3 id="单位向量："><a href="#单位向量：" class="headerlink" title="单位向量："></a>单位向量：</h3><p>单位向量是由该向量除以该向量的模，它的长度为1，只表示这个向量的方向，单位向量有无数个。</p><img src="/images/whatisvector/img11.png" /><h3 id="标准单位向量"><a href="#标准单位向量" class="headerlink" title="标准单位向量"></a>标准单位向量</h3><p>二维空间中有两个标准单位向量（1，0）、（0，1）<br>三维空间中有三个标准单位向量（1，0，0）、（0，1，0）、（0，0，1）<br>n维空间中有n个标准单位向量（1，0…..，0）、（0，1……，0）、（0，0……，1）</p><h3 id="向量的点乘（也叫内积）（dot）"><a href="#向量的点乘（也叫内积）（dot）" class="headerlink" title="向量的点乘（也叫内积）（dot）"></a>向量的点乘（也叫内积）（dot）</h3><p>两个向量相乘结果是一个数</p><img src="/images/whatisvector/img12.png" /><p>向量的乘法是将两个向量的每一项相乘再相加，同时等于这两个向量的模相乘再乘cos这两个向量直接的夹角θ<br>我们一般用向量的点乘可以反向求得这两个向量直接的角度是多少<br>同样我们能知道一个向量在另一个向量上的贡献程度，如下图：</p><img src="/images/whatisvector/img13.png" /><p>当两个向量相乘时如果结果为0，那么这两个向量就是互相垂直的，夹角为90°<br>当两个向量相乘时如果结果大于0，那么这两个向量的夹角为锐角<br>当两个向量相乘时如果结果小于0，那么这两个向量的夹角为钝角</p><h3 id="应用："><a href="#应用：" class="headerlink" title="应用："></a>应用：</h3><p>当我们使用的向量是n维向量时以电影为例（向量里的数可能代表一部电影的评分、类型、上线时间、票房、导演、演员等数据），我们可以通过计算n维向量的角度，如果角度越小则说明两部电影越相似，相反则说明两部电影无关，可以将其应用于相似电影的推荐。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;在讲什么是矩阵之前，我们需要来了解什么是向量：&lt;br&gt;向量是从研究一个数（例如：666） 拓展到研究一组数（例如：（6，66，666））的表示方法&lt;/p&gt;
+&lt;h4 id=&quot;向量有什么用？——有两个视角来看待&quot;&gt;&lt;a href=&quot;#向量有什么用？——有两个视角来看待&quot; cla</summary>
+      
+    
+    
+    
+    <category term="深度学习" scheme="https://www.aichaos.cn/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    
+    <category term="深度学习" scheme="https://www.aichaos.cn/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
     
   </entry>
   
