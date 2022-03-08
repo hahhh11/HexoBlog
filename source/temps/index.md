@@ -99,6 +99,7 @@ date: 2022-01-06 21:52:55
             {"name":"五子棋",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=gobang"},
             {"name":"一笔画",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=oneStroke"},
             {"name":"消消乐",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=xiaoxiaole"},
+            {"name":"拼图块",link:"https://www.aichaos.cn/MrKwon/released/index.html?game=puzzleBlock"},
         ]
     }
 
