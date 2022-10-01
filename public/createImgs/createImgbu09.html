@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Document</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1,
+            minimum-scale=1,
+            maximum-scale=1, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="full-screen" content="true" />
+        <meta name="screen-orientation" content="portrait" />
+        <meta name="x5-fullscreen" content="true" />
+        <meta name="360-fullscreen" content="true" />
+        <!-- polyfill -->
+        <script src="//yun.duiba.com.cn/libs0414/polyfill20210720.js"
+            crossorigin="anonymous"></script>
+        <!-- 渲染引擎 -->
+        <!-- <script src="./libs/fyge.min.js" crossorigin="anonymous"></script> -->
+        <!-- svga解析库 -->
+        <script src="//yun.duiba.com.cn/db_games/libs0924/svgaParser.minWeb.js"
+            crossorigin="anonymous"></script>
+
+        <script src="https://cdn.bootcdn.net/ajax/libs/dat-gui/0.7.9/dat.gui.js" crossorigin="anonymous"></script>
+        <!-- 本地的js,需要souremap调试的用本地js -->
+        <!-- <script src="libs/fyge.min.js"></script> -->
+        <!-- <script src="libs/svgaParser.min.js"></script> -->
+        <!-- <script src="libs/svgaParser.min1.js"></script> -->
+        <style>
+        @font-face {
+            font-family: 'webfont';
+            font-display: swap;
+            src: url('//at.alicdn.com/t/webfont_usnh0ph0qgk.eot');
+            /* IE9*/
+            src: url('//at.alicdn.com/t/webfont_usnh0ph0qgk.eot?#iefix') format('embedded-opentype'),
+                /* IE6-IE8 */
+                url('//at.alicdn.com/t/webfont_usnh0ph0qgk.woff2') format('woff2'),
+                url('//at.alicdn.com/t/webfont_usnh0ph0qgk.woff') format('woff'),
+                /* chrome、firefox */
+                url('//at.alicdn.com/t/webfont_usnh0ph0qgk.ttf') format('truetype'),
+                /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
+                url('//at.alicdn.com/t/webfont_usnh0ph0qgk.svg#AlibabaPuHuiTiH') format('svg');
+            /* iOS 4.1- */
+        }
+
+        * {
+            -webkit-touch-callout: none;
+
+            -webkit-user-select: none;
+
+            -moz-user-select: none;
+
+            -ms-user-select: none;
+
+            user-select: none;
+
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            border: 0;
+
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: absolute;
+            background-color: #93dbb7;
+            /* background: linear-gradient(#93dbb7,#ff0,#b5d89a); */
+            /* background: linear-gradient(#93dbb7,#b5d89a); */
+            /* 背景图片，解决加载太慢，白屏问题,加了这个下面的__loading__可以删掉了 */
+            /* background-size: 100%;
+            background-position: center;
+            background-image: url("https://yun.duiba.com.cn/db_games/activity/game/1550472986/resource/assets/playscene/playscenebg.jpg"); */
+        }
+    </style>
+    </head>
+
+    <body>
+        <!-- <div>浏览器缩放改成50%</div> -->
+        <div id="__loading__"
+            style="position:absolute;left:50%;top:50%;margin-left:-45px;color:#ffffff">拼命加载中...</div>
+        <div id="cusEngine" style="line-height:0;font-size:0;position:
+            absolute;">
+            <canvas id="fps" width="150" height="100" style="position:fixed"></canvas>
+            <canvas id="canvas" width="2248" height="2248" style="width:
+                2248px;height: 2248px;"></canvas>
+        </div>
+        <canvas id="cc" width="250" height="250"></canvas>
+        <select id="sexSelect" onchange="updateList(this)"
+            style="position:absolute;top:100px;left:20px;">
+            <option value="female">女</option>
+            <option value="male">男</option>
+        </select>
+        <div style="position:absolute;top:250px;left:20px;">
+            上衣:
+            <select id="upper" onchange="updateUpper(this)"></select>
+        </div>
+        <div style="position:absolute;top:300px;left:20px;">
+            下装:
+            <select id="lower" onchange="updateLower(this)"></select>
+        </div>
+        <div style="position:absolute;top:350px;left:20px;">
+            鞋子:
+            <select id="shoes" onchange="updateShoes(this)"></select>
+        </div>
+        <div style="position:absolute;top:400px;left:20px;">
+            头部:
+            <select id="head" onchange="updateHead(this)"></select>
+        </div>
+        <div style="position:absolute;top:450px;left:20px;">
+            动作:
+            <select id="action" onchange="updateAction(this)">
+                <option value=0>走路</option>
+                <option value=1>跑步</option>
+                <option value=2>篮球</option>
+                <option value=3>街舞</option>
+            </select>
+        </div>
+        <div style="position:absolute;top:550px;left:20px;">
+            当前帧时:
+            <input type="number" onchange="seekStop(this)"/>
+        </div>
+        <div style="position:absolute;top:600px;left:20px;">
+            保存图片类型:
+            <select id="imgTypeSelect" onchange="updateCamera(this)">
+                <option value="avatar">头像</option>
+                <option value="right">右视图</option>
+                <option value="left">左视图</option>
+                <option value="front">正视图</option>
+            </select>
+        </div>
+        <div onclick="save()" style="position:absolute;top:650px;left:20px">保存图片</div>
+        <div onclick="cutAvatars()"
+            style="position:absolute;top:100px;left:200px">批量保存头像</div>
+        <div onclick="cutPosterLeft()"
+            style="position:absolute;top:150px;left:200px">批量保存海报左</div>
+        <div onclick="cutPosterRight()"
+            style="position:absolute;top:200px;left:200px">批量保存海报右</div>
+        <div onclick="cutPosterFront()"
+            style="position:absolute;top:250px;left:200px">批量保存海报中</div>
+        <!-- 帧率检测 -->
+        <!-- <script src="//yun.duiba.com.cn/db_games/libs0924/stats.js"></script> -->
+        <!-- <script src="https://yun.duiba.com.cn/db_games/libs0126/stats.js"></script> -->
+        <!-- 构建的js -->
+        <script src="./output.js" crossorigin="anonymous"></script>
+        <!-- <script src="./released/output.js" crossorigin="anonymous"></script> -->
+        <script>
+        console.log("ModelList:", ModelList)
+        const list = { "female": {}, "male": {} }
+        Object.keys(ModelList).forEach((key) => {
+            ModelList[key].modelId = key
+            if (key.split("")[2] === "0" || key === "girlbody") {
+                if (!list['female'][ModelList[key].type]) {
+                    list['female'][ModelList[key].type] = []
+                }
+                list['female'][ModelList[key].type].push(ModelList[key])
+            } else if (key.split("")[2] === "1" || key === "boybody") {
+                if (!list['male'][ModelList[key].type]) {
+                    list['male'][ModelList[key].type] = []
+                }
+                list['male'][ModelList[key].type].push(ModelList[key])
+            }
+
+        })
+
+        console.log("list:", list)
+        
+        let sex = "female";
+        let currImgBatchType = "single";
+        let currImgType = "avatar";
+        let currList = list[sex];
+        let currUpperModelId = "010000001";
+        let currLowerModelId = "020000001";
+        let currShoesModelId = "040000001";
+        let currHeadModelId = "050000001";
+        let currAction = "060000001";
+        let upperStart = 1;
+        let upperEnd = 1;
+        let lowerStart = 1;
+        let lowerEnd = 1;
+        let headStart = 1;
+        let headEnd = 1;
+        let shoesStart = 1;
+        let shoesEnd = 1;
+        let totalFrame = 0;
+
+        const modelIdList = {
+            male: {
+                upper: [
+                    "011000001",
+                    "011000002",
+                    "011000003",
+                    "011000004",
+                    "011000005",
+                    "011000006",
+                    "011000007",
+                    "011000008",
+                ],
+                lower: [
+                    "021000001",
+                    "021000002",
+                    "021000003",
+                    "021000004",
+                    "021000005",
+                    "021000006",
+                    "021000007",
+                    "021000008",
+                    "021000009",
+                    "021000010",
+                    "021000011",
+                    "021000012",
+                    "021000013",
+                    "021000014",
+                    "021000015",
+                    "021000016",
+                ],
+                shoes: [
+                    "041000001",
+                    "041000002",
+                    "041000003",
+                    "041000004",
+                    "041000005",
+                    "041000006",
+                    "041000007",
+                    "041000008",
+                    "041000009",
+                    "041000010",
+                    "041000011",
+                    "041000012",
+                    "041000013",
+                    "041000014",
+                    "041000015",
+                    "041000016",
+                    "041000017",
+                    "041000018",
+                    "041000019",
+                    "041000020",
+                    "041000021",
+                    "041000022",
+                    "041000023",
+                    "041000024",
+                    "041000025",
+                    "041000026",
+                    "041000027",
+                    "041000028",
+                    "041000029",
+                    "041000030",
+                    "041000031",
+                    "041000032",
+                    "041000033",
+                    "041000034",
+                    "041000035",
+                    "041000036",
+                    "041000037",
+                    "041000038",
+                    "041000039",
+                    "041000040"
+                ],
+                head: [
+                    "051000001",
+                    "051000002",
+                    "051000003"
+                ],
+                move: [
+                    "061000001",
+                    "061000002",
+                    "061000003",
+                    "061000004"
+                ]
+            },
+            female: {
+                upper: [   
+                    "010000001",
+                    "010000002",
+                    "010000003",
+                    "010000004",
+                    "010000005",
+                    "010000006",
+                    "010000007",
+                    "010000008",
+                    "010000009",
+                    "010000010",
+                    "010000011",
+                    "010000012",
+                    "010000013",
+                    "010000014",
+                    "010000015",
+                    "010000016"
+                ],
+                lower: [
+                    "020000001",
+                    "020000002",
+                    "020000003",
+                    "020000004",
+                    "020000005",
+                    "020000006",
+                    "020000007",
+                    "020000008",
+                    "020000009",
+                    "020000010",
+                    "020000011",
+                    "020000012",
+                    "020000013",
+                    "020000014",
+                    "020000015",
+                    "020000016"
+                ],
+                shoes: [
+                    "040000001",
+                    "040000002",
+                    "040000004",
+                    "040000003",
+                    "040000005",
+                    "040000006",
+                    "040000007",
+                    "040000008",
+                    "040000009",
+                    "040000010",
+                    "040000011",
+                    "040000012",
+                    "040000013",
+                    "040000014",
+                    "040000015",
+                    "040000016",
+                    "040000017",
+                    "040000018",
+                    "040000019",
+                    "040000020",
+                    "040000021",
+                    "040000022",
+                    "040000023",
+                    "040000024",
+                    "040000025",
+                    "040000026",
+                    "040000027",
+                    "040000028",
+                    "040000029",
+                    "040000030",
+                    "040000031",
+                    "040000032",
+                    "040000033",
+                    "040000034",
+                    "040000035",
+                    "040000036",
+                    "040000037",
+                    "040000038",
+                    "040000039",
+                    "040000040",
+                ],
+                head: [
+                    "050000001",
+                    "050000002",
+                    "050000003",
+                ],
+                move: [
+                    "060000001",
+                    "060000002",
+                    "060000003",
+                    "060000004"
+                ]
+            }
+        }
+
+        function updateList(obj) {
+            let index = obj?.selectedIndex || 0;
+            let val = obj ? obj.options[index].value : 'female';
+            sex = val
+            currList = list[val]
+            upperStart = 1
+            upperEnd = 1
+            lowerStart = 1
+            lowerEnd = 1
+            headStart = 1
+            headEnd = 1
+            shoesStart = 1
+            shoesEnd = 1
+            updateSelect('head')
+            updateSelect('upper')
+            updateSelect('lower')
+            updateSelect('shoes')
+            let dk = getDK()
+            console.log(dk)
+            updateAthletar(dk)
+        }
+
+        function updateSelect(id) {
+            let select = document.getElementById(id);
+            select.options.length = 0;
+            for (let i = 0; i < currList[id].length; i++) {
+                //添加 option
+                let key = currList[id][i].modelId
+                let val = currList[id][i].modelId
+                let option = new Option(key, val)
+                select.add(option);
+            }
+
+            let val = select.options[0].value;
+            if (id == "head") {
+                currHeadModelId = val
+            }
+            if (id == "upper") {
+                currUpperModelId = val
+            }
+            if (id == "lower") {
+                currLowerModelId = val
+            }
+            if (id == "shoes") {
+                currShoesModelId = val
+            }
+        }
+
+        function updateHead(obj) {
+            let index = obj?.selectedIndex || 0;
+            let val = obj.options[index].value;
+            currHeadModelId = val
+
+            let dk = getDK()
+            console.log(dk)
+            updateAthletar(dk)
+        }
+        function updateUpper(obj) {
+            let index = obj?.selectedIndex || 0;
+            let val = obj.options[index].value;
+            currUpperModelId = val
+
+            let dk = getDK()
+            console.log(dk)
+            updateAthletar(dk)
+        }
+        function updateLower(obj) {
+            let index = obj?.selectedIndex || 0;
+            let val = obj.options[index].value;
+            currLowerModelId = val
+
+            let dk = getDK()
+            console.log(dk)
+            updateAthletar(dk)
+        }
+        function updateShoes(obj) {
+            let index = obj?.selectedIndex || 0;
+            let val = obj.options[index].value;
+            currShoesModelId = val
+
+            let dk = getDK()
+            console.log(dk)
+            updateAthletar(dk)
+        }
+
+        function updateAction(obj) {
+            
+            let index = obj?.selectedIndex || 0;
+            let arr = ["060000001", "060000002", "060000003", "060000004"]
+            if (sex === "male") {
+                arr = ["061000001", "061000002", "061000003", "061000004"]
+            }
+            currAction = arr[index]
+
+            let dk = getDK()
+            console.log(dk)
+            updateAthletar(dk)
+        }
+
+        function seekStop(obj){
+            GDispatcher.dispatchEvent({type:"seekStop",time: obj.valueAsNumber})
+        }
+
+        function updateCamera() {
+
+        }
+
+        
+
+        function getDK() {
+            return `${currUpperModelId}_${currLowerModelId}_0_${currShoesModelId}_${currHeadModelId}_${currAction}_0`
+        }
+
+        async function updateAthletar(ids) {
+            return new Promise((r, j) => {
+                GDispatcher.dispatchEvent({
+                    type: "updateAthletar",
+                    data: {
+                        ids,
+                        success: () => { r() },
+                        fail: () => { j() }
+                    }
+                })
+            })
+        }
+
+
+        async function save(dk,imgType) {
+            if(!imgType){
+                var select = document.getElementById("imgTypeSelect")
+                var imgType = select.options[select.selectedIndex].value
+            }
+            if(!dk){
+                var dk = getDK()
+            }
+            return new Promise((r, j) => {
+                GDispatcher.dispatchEvent({
+                    type: "cutImgs",
+                    data: {
+                        dk,
+                        imgType,
+                        success: r,
+                        fail: j
+                    }
+                })
+            })
+
+        }
+
+        async function cutAvatars(){
+            let select = document.getElementById('sexSelect')
+            let sex = select.value ||'female'
+            let actionSelect = document.getElementById('action')
+            let moveIdx = actionSelect.value || 0
+            let {upper, lower, shoes, head, move} = modelIdList[sex]
+            for(let a=0;a<upper.length;a++){
+                for(let b=0;b<lower.length;b++){
+                    for(let c=0;c<shoes.length;c++){
+                        for(let d=0;d<head.length;d++){
+                            //for(let e=0;e<move.length;e++){
+                                let dk = `${upper[a]}_${lower[b]}_0_${shoes[c]}_${head[d]}_${move[moveIdx]}_0`
+                                console.log(dk)
+                                await updateAthletar(dk)
+                                await save(dk,'avatar')
+                           // }
+                        }
+                    }
+                }
+            }
+           
+        }
+
+        async function cutPosterLeft(){
+            let select = document.getElementById('sexSelect')
+            let sex = select.value ||'female'
+            let actionSelect = document.getElementById('action')
+            let moveIdx = actionSelect.value || 0
+            let {upper, lower, shoes, head, move} = modelIdList[sex]
+            let flag = Date.now()
+            for(let a=0;a<upper.length;a++){
+                for(let b=0;b<lower.length;b++){
+                    for(let c=0;c<shoes.length;c++){
+                        for(let d=0;d<head.length;d++){
+                            //for(let e=0;e<move.length;e++){
+                                let dk = `${upper[a]}_${lower[b]}_0_${shoes[c]}_${head[d]}_${move[moveIdx]}_0`
+                                console.log(dk)
+                                await updateAthletar(dk)
+                                await save(dk,'left')
+                            //}
+                        }
+                    }
+                }
+            }
+            console.log(`生成耗时：${(Date.now()-flag)/1000} s`)
+           
+        }
+
+        async function cutPosterRight(){
+            let select = document.getElementById('sexSelect')
+            let sex = select.value ||'female'
+            let actionSelect = document.getElementById('action')
+            let moveIdx = actionSelect.value || 0
+            let {upper, lower, shoes, head, move} = modelIdList[sex]
+            let flag = Date.now()
+            for(let a=0;a<upper.length;a++){
+                for(let b=0;b<lower.length;b++){
+                    for(let c=0;c<shoes.length;c++){
+                        for(let d=0;d<head.length;d++){
+                            //for(let e=0;e<move.length;e++){
+                                let dk = `${upper[a]}_${lower[b]}_0_${shoes[c]}_${head[d]}_${move[moveIdx]}_0`
+                                console.log(dk)
+                                
+                                await updateAthletar(dk)
+                                await save(dk,'right')
+                            //}
+                        }
+                    }
+                }
+            }
+           
+            console.log(`生成耗时：${(Date.now()-flag)/1000} s`)
+        }
+
+        async function cutPosterFront(){
+            let select = document.getElementById('sexSelect')
+            let sex = select.value ||'female'
+            let actionSelect = document.getElementById('action')
+            let moveIdx = actionSelect.value || 0
+            let {upper, lower, shoes, head, move} = modelIdList[sex]
+            let flag = Date.now()
+            for(let a=0;a<upper.length;a++){
+                for(let b=0;b<lower.length;b++){
+                    for(let c=0;c<shoes.length;c++){
+                        for(let d=0;d<head.length;d++){
+                            //for(let e=0;e<move.length;e++){
+                                let dk = `${upper[a]}_${lower[b]}_0_${shoes[c]}_${head[d]}_${move[moveIdx]}_0`
+                                console.log(dk)
+                                await updateAthletar(dk)
+                                await save(dk,'front')
+                            //}
+                        }
+                    }
+                }
+            }
+           
+            console.log(`生成耗时：${(Date.now()-flag)/1000} s`)
+           
+        }
+
+
+
+        window.addEventListener("load", () => {
+
+            updateList();
+            //获取canvas
+            var canvas = document.getElementById("canvas");
+            //实例
+            window.canvas = new Main(canvas, canvas.clientWidth, canvas.clientHeight)
+            //let style = {opacity:1}
+            //TWEEN.get(style,{onChange:()=>{
+            //    canvas.style.opacity = style.opacity+""
+            //}})
+            //.to({opacity:0},5000)
+            canvas.addEventListener('touchstart', (e) => {
+                GDispatcher.dispatchEvent({ type: 'onTouchStart', data: e },)
+            })
+            canvas.addEventListener('touchmove', (e) => {
+                GDispatcher.dispatchEvent({ type: 'onTouchMove', data: e })
+            })
+            canvas.addEventListener('touchend', (e) => {
+                GDispatcher.dispatchEvent({ type: 'onTouchEnd', data: e })
+            })
+            canvas.addEventListener('touchcancel', (e) => {
+                GDispatcher.dispatchEvent({ type: 'onTouchEnd', data: e })
+            })
+
+            canvas.addEventListener('mousedown', (e) => {
+                GDispatcher.dispatchEvent({ type: 'onMouseDown', data: e },)
+            })
+
+            canvas.addEventListener('mousemove', (e) => {
+                GDispatcher.dispatchEvent({ type: 'onMouseMove', data: e },)
+            })
+
+            canvas.addEventListener('mouseup', (e) => {
+                GDispatcher.dispatchEvent({ type: 'onMouseUp', data: e })
+            })
+
+            window.addEventListener('resize', (e) => {
+                //console.log(e)
+                GDispatcher.dispatchEvent({ type: 'onResize', data: e })
+            }, false)
+
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'))
+                GDispatcher.dispatchEvent({
+                    type: "updateAthletar",
+                    data: {
+                        ids: "010000001_020000001_0_040000001_050000001_060000001_0",
+                        success: () => { console.log("010000001_020000001_0_040000001_050000001_060000001_0") },
+                        fail: () => { console.log(22222) }
+                    }
+                })
+            }, 200)
+        })
+    </script>
+    </body>
+
+</html>
