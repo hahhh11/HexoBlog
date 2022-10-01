@@ -55978,6 +55978,7 @@ class CreateImgsScene extends Scene_1.Scene {
                     this.athletarCtrl.updateAction();
                     this.athletarCtrl.mixerPool[name].setTime(time);
                 });
+				this.bgCtrl.reloadGround();
                 this.bgCtrl.update();
                 Layers_1.layers.mainLayerCamera.setPosition(direction[imgType][0] * 0.93, direction[imgType][1], direction[imgType][2] * 0.93);
                 let name = "";
