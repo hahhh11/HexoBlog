@@ -55962,10 +55962,10 @@ class CreateImgsScene extends Scene_1.Scene {
                         this.athletarCtrl.athletarBox.setPosition(-0.21, 0, -0.1);
                     }
                     else if (imgType == "front") {
-                        this.athletarCtrl.athletarBox.setPosition(-0.21, 0, -0.1);
+                        this.athletarCtrl.athletarBox.setPosition(-0.48, 0, -0.1);
                     }
                     else if (imgType == "right") {
-                        this.athletarCtrl.athletarBox.setPosition(-0.62, 0, -0.1);
+                        this.athletarCtrl.athletarBox.setPosition(-0.85, 0, -0.1);
                     }
                     direction = {
                         left: [7.875, 0.75, 10.46],
