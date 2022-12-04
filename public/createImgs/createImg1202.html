@@ -150,7 +150,10 @@
             style="position:absolute;top:200px;left:200px">批量保存海报右</div>
         <div onclick="cutPosterFront()"
             style="position:absolute;top:250px;left:200px">批量保存海报中</div> -->
-
+        <div style="position:absolute;top:50px;left:200px;">
+            开始生成的张数序号:
+            <input type="number" value="0" onchange="changeStartCount(this)"/>
+        </div>
         <div onclick="cut2023CNYAvatars()"
             style="position:absolute;top:100px;left:200px">批量保存CNY头像</div>
         <div onclick="cut2023CNYPosterLeft()"
@@ -205,6 +208,7 @@
         let shoesStart = 1;
         let shoesEnd = 1;
         let totalFrame = 0;
+        let startCount = 0;
 
         const modelIdList = {
             male: {
@@ -483,6 +487,8 @@
             updateAthletar(dk)
         }
 
+
+
         function updateSelect(id) {
             let select = document.getElementById(id);
             select.options.length = 0;
@@ -610,6 +616,11 @@
 
         }
 
+        function changeStartCount(...args){
+            console.log("当前设置批量生成起始张数：",args[0].valueAsNumber)
+            startCount = args[0].valueAsNumber
+        }
+
         // 执行组合排列的函数
         function doExchange(arr){
             var len = arr.length;
@@ -672,6 +683,8 @@
                 dkBase = arr1.concat(arr2).concat(arr3).concat(arr4)
             }
             let nDkBase =  Array.from(new Set(dkBase))
+            nDkBase = nDkBase.splice(startCount,nDkBase.length-startCount)
+            console.log(nDkBase)
             for(let i =0;i<nDkBase.length;i++){
                 let dk = nDkBase[i]
                 console.log(dk)
@@ -702,6 +715,8 @@
                 dkBase = arr1.concat(arr2).concat(arr3).concat(arr4)
             }
             let nDkBase =  Array.from(new Set(dkBase))
+            nDkBase = nDkBase.splice(startCount,nDkBase.length-startCount)
+            console.log(nDkBase)
             for(let i =0;i<nDkBase.length;i++){
                 let dk = nDkBase[i]
                 console.log(dk)
@@ -733,6 +748,8 @@
                 dkBase = arr1.concat(arr2).concat(arr3).concat(arr4)
             }
             let nDkBase =  Array.from(new Set(dkBase))
+            nDkBase = nDkBase.splice(startCount,nDkBase.length-startCount)
+            console.log(nDkBase)
             for(let i =0;i<nDkBase.length;i++){
                 let dk = nDkBase[i]
                 console.log(dk)
@@ -764,6 +781,8 @@
             }
             
             let nDkBase =  Array.from(new Set(dkBase))
+            nDkBase = nDkBase.splice(startCount,nDkBase.length-startCount)
+            console.log(nDkBase)
             for(let i =0;i<nDkBase.length;i++){
                 let dk = nDkBase[i]
                 console.log(dk)
